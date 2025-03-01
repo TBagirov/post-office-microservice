@@ -1,0 +1,25 @@
+server:
+  port: 8765
+
+spring:
+  application:
+    name: gateway-api
+
+gateway:
+  routes:
+    - id: auth-service
+      path: /api/auth/**
+      uri: lb://auth-service
+
+
+
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+logging:
+  pattern:
+    console: %C{1.} [%-5level] %d{HH:mm:ss} - %msg%n
