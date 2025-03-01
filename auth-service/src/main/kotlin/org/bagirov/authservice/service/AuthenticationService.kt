@@ -38,10 +38,11 @@ class AuthenticationService(
             throw IllegalArgumentException("Поля логин и/или пароль пустые")
         }
 
-        authenticationManager.authenticate(UsernamePasswordAuthenticationToken(request.username, request.password))
-
+        // *временный коммент* ---менял---
         val user = userRepository.findByUsername(request.username)
-            .orElseThrow { throw NoSuchElementException("пользователя не существует") }
+            .orElseThrow { throw NoSuchElementException("пользователь не зарегистрирован") }
+
+        authenticationManager.authenticate(UsernamePasswordAuthenticationToken(request.username, request.password))
 
         val accessToken = jwtService.createAccessToken(user)
         val refreshToken = jwtService.createRefreshToken(user)
