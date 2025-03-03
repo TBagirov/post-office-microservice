@@ -3,9 +3,9 @@ package org.bagirov.authservice.controller
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
-import org.bagirov.authservice.dto.AuthenticationRequest
-import org.bagirov.authservice.dto.AuthenticationResponse
-import org.bagirov.authservice.dto.RegistrationRequest
+import org.bagirov.authservice.dto.request.AuthenticationRequest
+import org.bagirov.authservice.dto.response.AuthenticationResponse
+import org.bagirov.authservice.dto.request.RegistrationRequest
 import org.bagirov.authservice.service.AuthenticationService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
