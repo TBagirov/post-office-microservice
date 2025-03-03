@@ -1,4 +1,4 @@
-package org.bagirov.authservice.dto
+package org.bagirov.authservice.dto.request
 
 data class RegistrationRequest (
     val name: String,
