@@ -1,17 +1,18 @@
 package org.bagirov.authservice.service
 
-
 import io.jsonwebtoken.JwtException
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletResponse
-import org.bagirov.authservice.dto.AuthenticationRequest
-import org.bagirov.authservice.dto.AuthenticationResponse
-import org.bagirov.authservice.dto.RegistrationRequest
+import mu.KotlinLogging
+import org.bagirov.authservice.dto.request.AuthenticationRequest
+import org.bagirov.authservice.dto.response.AuthenticationResponse
+import org.bagirov.authservice.dto.request.RegistrationRequest
 import org.bagirov.authservice.entity.RefreshTokenEntity
 import org.bagirov.authservice.entity.UserEntity
 import org.bagirov.authservice.repository.RefreshTokenRepository
 import org.bagirov.authservice.repository.RoleRepository
 import org.bagirov.authservice.repository.UserRepository
+import org.bagirov.authservice.utill.convertToResponseDto
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseCookie
 import org.springframework.security.authentication.AuthenticationManager
@@ -29,61 +30,57 @@ class AuthenticationService(
     private val jwtService: JwtService,
     private val authenticationManager: AuthenticationManager,
     private val passwordEncoder: PasswordEncoder,
-    private val refreshTokenRepository: RefreshTokenRepository
+    private val refreshTokenRepository: RefreshTokenRepository,
+    private val kafkaProducerService: KafkaProducerService
 ) {
+
+    private val log = KotlinLogging.logger {}
 
     @Transactional
     fun authorization(request: AuthenticationRequest, response: HttpServletResponse): AuthenticationResponse {
+        log.info { "Starting authorization process for user: ${request.username}" }
         if (!isValidAuthenticationCredentials(request)) {
+            log.warn { "Invalid authentication credentials provided" }
             throw IllegalArgumentException("Поля логин и/или пароль пустые")
         }
 
-        // *временный коммент* ---менял---
         val user = userRepository.findByUsername(request.username)
-            .orElseThrow { throw NoSuchElementException("пользователь не зарегистрирован") }
+            .orElseThrow {
+                log.error { "User ${request.username} not found" }
+                NoSuchElementException("пользователь не зарегистрирован")
+            }
 
         authenticationManager.authenticate(UsernamePasswordAuthenticationToken(request.username, request.password))
+        log.info { "User ${request.username} authenticated successfully" }
 
         val accessToken = jwtService.createAccessToken(user)
         val refreshToken = jwtService.createRefreshToken(user)
 
-        val refreshTokenEntity = RefreshTokenEntity(
-            user = user,
-            token = refreshToken
-        )
-        refreshTokenRepository.save(refreshTokenEntity)
+        refreshTokenRepository.save(RefreshTokenEntity(user = user, token = refreshToken))
+        log.info { "Generated new refresh token for user: ${request.username}" }
 
         setRefreshTokenInCookie(response, refreshToken)
-
-        return AuthenticationResponse(
-            accessToken = accessToken,
-            refreshToken = refreshToken,
-            username = user.username,
-            id = user.id!!
-        )
+        return AuthenticationResponse(accessToken = accessToken, username = user.username, id = user.id!!)
     }
 
     @Transactional
     fun registration(request: RegistrationRequest, response: HttpServletResponse): AuthenticationResponse {
+        log.info { "Starting registration process for user: ${request.username}" }
         if (!isValidRegistrationCredentials(request)) {
+            log.warn { "Invalid registration credentials provided" }
             throw IllegalArgumentException("Заполнены не все данные!!!")
         }
 
-        val users = userRepository.findAll()
-
-        users.forEach { user ->
-            if (request.username == user.username) {
-                throw IllegalArgumentException("Пользователь с таким username уже существует")
-            }
+        if (userRepository.findAll().any { it.username == request.username }) {
+            log.warn { "User with username ${request.username} already exists" }
+            throw IllegalArgumentException("Пользователь с таким username уже существует")
         }
 
-        val roleGuest = roleRepository
-            .findByName("GUEST")
-
+        val roleGuest = roleRepository.findByName("GUEST")!!
         val user = UserEntity(
             username = request.username,
             password = passwordEncoder.encode(request.password),
-            role = roleGuest!!,
+            role = roleGuest,
             name = request.name,
             surname = request.surname,
             patronymic = request.patronymic,
@@ -93,82 +90,60 @@ class AuthenticationService(
         )
 
         userRepository.save(user)
+        log.info { "User ${request.username} registered successfully" }
 
         val accessToken = jwtService.createAccessToken(user)
         val refreshToken = jwtService.createRefreshToken(user)
 
         setRefreshTokenInCookie(response, refreshToken)
+        refreshTokenRepository.save(RefreshTokenEntity(user = user, token = refreshToken))
+        log.info { "Generated refresh token for newly registered user: ${request.username}" }
 
-        val refreshTokenEntity = RefreshTokenEntity(
-            user = user,
-            token = refreshToken
-        )
-        refreshTokenRepository.save(refreshTokenEntity)
+        kafkaProducerService.sendUserCreatedEvent(user.convertToResponseDto())
+        log.info { "Sent Kafka event for user registration: ${request.username}" }
 
-        return AuthenticationResponse(
-            accessToken = accessToken,
-            refreshToken = refreshToken,
-            username = user.username,
-            id = user.id!!
-        )
+        return AuthenticationResponse(accessToken = accessToken, username = user.username, id = user.id!!)
     }
 
     fun logout(token: String, response: HttpServletResponse): Map<String, String> {
-        val refreshTokensEntity = refreshTokenRepository.findAllByToken(token)
-        refreshTokensEntity.forEach { refreshToken ->
-            refreshTokenRepository.delete(refreshToken)
-        }
+        log.info { "Logging out user with refresh token: $token" }
+        refreshTokenRepository.findAllByToken(token).forEach { refreshTokenRepository.delete(it) }
 
         val cookie = Cookie("refreshToken", null)
         cookie.maxAge = 0
         cookie.path = "/"
         response.addCookie(cookie)
+        log.info { "Cleared refresh token cookie" }
 
         return mapOf("message" to "Logout successful")
     }
 
     @Transactional
     fun refresh(userToken: String, response: HttpServletResponse): AuthenticationResponse {
+        log.info { "Refreshing token for user token: $userToken" }
         if (userToken.isEmpty()) {
+            log.warn { "Token is empty" }
             throw JwtException("Token is empty")
         }
 
         val username = jwtService.getUsername(userToken)
-        val user = userRepository.findByUsername(username)
-            .orElseThrow() { throw NoSuchElementException("Пользователя с таким username(${username}) больше нет") }
-
-        var isValidToken = false
-
-        val refreshTokens: MutableList<RefreshTokenEntity> = refreshTokenRepository.findAll()
-        for (token in refreshTokens) {
-            if (token.token == userToken) {
-                isValidToken = true
-            }
+        val user = userRepository.findByUsername(username).orElseThrow {
+            log.error { "User not found for token: $userToken" }
+            NoSuchElementException("Пользователя с таким username(${username}) больше нет")
         }
 
-        if (!isValidToken) {
+        if (!refreshTokenRepository.findAll().any { it.token == userToken }) {
+            log.warn { "Invalid refresh token: $userToken" }
             throw JwtException("Token not valid")
         }
 
         val accessToken = jwtService.createAccessToken(user)
         val refreshToken = jwtService.createRefreshToken(user)
+        refreshTokenRepository.save(RefreshTokenEntity(user = user, token = refreshToken))
+        log.info { "Generated new access and refresh tokens for user: ${user.username}" }
 
-        userRepository.save(user)
-
-        val refreshTokenEntity = RefreshTokenEntity(
-            user = user,
-            token = refreshToken
-        )
-
-        refreshTokenRepository.save(refreshTokenEntity)
         setRefreshTokenInCookie(response, refreshToken)
-
-        return AuthenticationResponse(
-            accessToken = accessToken,
-            refreshToken = refreshToken,
-            username = user.username,
-            id = user.id!!
-        )
+        return AuthenticationResponse(accessToken = accessToken, username = user.username, id = user.id!!)
     }
 
     fun setRefreshTokenInCookie(response: HttpServletResponse, token: String) {
@@ -181,6 +156,7 @@ class AuthenticationService(
             .build()
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString())
+        log.info { "Set refresh token in cookie" }
     }
 
     private fun isValidAuthenticationCredentials(request: AuthenticationRequest) =
@@ -188,5 +164,4 @@ class AuthenticationService(
 
     private fun isValidRegistrationCredentials(request: RegistrationRequest) =
         request.username.isNotEmpty() && request.password.isNotEmpty() && request.name.isNotEmpty()
-
 }
