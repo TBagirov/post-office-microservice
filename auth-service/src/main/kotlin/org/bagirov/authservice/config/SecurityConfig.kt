@@ -30,6 +30,8 @@ class SecurityConfig(
             .authorizeHttpRequests { authorizationManagerRequestMatcherRegistry ->
                 authorizationManagerRequestMatcherRegistry
                     .requestMatchers("api/auth/registration-postman").hasAuthority(Role.ADMIN)
+                    .requestMatchers("/api/auth/user").hasAuthority(Role.ADMIN)
+                    .requestMatchers("/api/auth/user/**").hasAuthority(Role.ADMIN)
                     .requestMatchers(
                         "/api/auth/**",
                     )
