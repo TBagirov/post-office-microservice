@@ -17,6 +17,14 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    hostname: localhost    # Принудительно указываем localhost
+    prefer-ip-address: true  # Использовать IP-адрес вместо имени хоста
+
 server:
   port: 8081
 

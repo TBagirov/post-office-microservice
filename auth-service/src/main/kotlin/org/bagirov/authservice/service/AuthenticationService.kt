@@ -12,7 +12,7 @@ import org.bagirov.authservice.entity.UserEntity
 import org.bagirov.authservice.repository.RefreshTokenRepository
 import org.bagirov.authservice.repository.RoleRepository
 import org.bagirov.authservice.repository.UserRepository
-import org.bagirov.authservice.utill.convertToResponseDto
+import org.bagirov.authservice.utill.convertToResponseEventDto
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseCookie
 import org.springframework.security.authentication.AuthenticationManager
@@ -99,7 +99,7 @@ class AuthenticationService(
         refreshTokenRepository.save(RefreshTokenEntity(user = user, token = refreshToken))
         log.info { "Generated refresh token for newly registered user: ${request.username}" }
 
-        kafkaProducerService.sendUserCreatedEvent(user.convertToResponseDto())
+        kafkaProducerService.sendUserCreatedEvent(user.convertToResponseEventDto())
 
         log.info { "Sent Kafka event for user registration: ${request.username}" }
 
