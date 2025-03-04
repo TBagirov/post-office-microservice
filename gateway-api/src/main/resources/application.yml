@@ -10,9 +10,9 @@ gateway:
     - id: auth-service
       path: /api/auth/**
       uri: lb://auth-service
-
-
-
+    - id: postal-service
+      path: /api/postal/**
+      uri: lb://postal-service
 
 
 eureka:
