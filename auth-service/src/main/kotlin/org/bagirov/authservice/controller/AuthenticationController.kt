@@ -6,6 +6,7 @@ import mu.KotlinLogging
 import org.bagirov.authservice.dto.request.AuthenticationRequest
 import org.bagirov.authservice.dto.response.AuthenticationResponse
 import org.bagirov.authservice.dto.request.RegistrationRequest
+import org.bagirov.authservice.props.Role
 import org.bagirov.authservice.service.AuthenticationService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -19,29 +20,45 @@ class AuthenticationController(
 
     @PostMapping("/authorization")
     @Operation(summary = "Авторизация пользователя")
-    fun authorization(@RequestBody request: AuthenticationRequest, response: HttpServletResponse): ResponseEntity<AuthenticationResponse> {
+    fun authorization(@RequestBody request: AuthenticationRequest, response: HttpServletResponse):
+            ResponseEntity<AuthenticationResponse>
+    {
         logger.info {"Request to authorization ${request.username}"}
         return ResponseEntity.ok(authenticationService.authorization(request, response))
     }
 
     @PostMapping("/registration")
     @Operation(summary = "Регистрация пользователя")
-    fun registration(@RequestBody request: RegistrationRequest, response: HttpServletResponse): ResponseEntity<AuthenticationResponse> {
+    fun registration(@RequestBody request: RegistrationRequest, response: HttpServletResponse):
+            ResponseEntity<AuthenticationResponse>
+    {
         logger.info("Request to registration ${request.username}")
         return ResponseEntity.ok(authenticationService.registration(request, response))
     }
 
+    @PostMapping("/registration-postman")
+    @Operation(summary = "Регистрация пользователя")
+    fun registrationPostman(@RequestBody request: RegistrationRequest, response: HttpServletResponse):
+            ResponseEntity<AuthenticationResponse>
+    {
+        logger.info("Request to registration postman ${request.username}")
+        return ResponseEntity.ok(authenticationService.registration(request, response, Role.POSTMAN))
+    }
+
     @PostMapping("/logout")
     @Operation(summary = "Выход пользователя с сайта")
-    fun logout(@CookieValue(value = "refreshToken") token: String,
-               response: HttpServletResponse): ResponseEntity<Map<String, String>> {
+    fun logout(@CookieValue(value = "refreshToken") token: String, response: HttpServletResponse):
+            ResponseEntity<Map<String, String>>
+    {
         logger.info("Request to logout")
         return ResponseEntity.ok(authenticationService.logout(token, response))
     }
 
     @GetMapping("/refresh")
     @Operation(summary = "Обновление токена")
-    fun refresh(@CookieValue(value = "refreshToken") token: String, response: HttpServletResponse): ResponseEntity<AuthenticationResponse> {
+    fun refresh(@CookieValue(value = "refreshToken") token: String, response: HttpServletResponse):
+            ResponseEntity<AuthenticationResponse>
+    {
         logger.info {"Request to refresh"}
         return ResponseEntity.ok(authenticationService.refresh(token, response))
     }

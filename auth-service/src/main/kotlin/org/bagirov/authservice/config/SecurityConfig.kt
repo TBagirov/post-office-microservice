@@ -29,6 +29,7 @@ class SecurityConfig(
             .addFilterBefore(JwtAuthenticationFilter(userDetailsService, jwtService), UsernamePasswordAuthenticationFilter::class.java)
             .authorizeHttpRequests { authorizationManagerRequestMatcherRegistry ->
                 authorizationManagerRequestMatcherRegistry
+                    .requestMatchers("api/auth/registration-postman").hasAuthority(Role.ADMIN)
                     .requestMatchers(
                         "/api/auth/**",
                     )
