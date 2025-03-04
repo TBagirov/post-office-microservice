@@ -13,5 +13,6 @@ data class UserResponse(
     val email: String,
     val phone: String,
     val createdAt: LocalDateTime,
+    val updatedAt: LocalDateTime?,
     val role: String
 )

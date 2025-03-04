@@ -32,5 +32,7 @@ fun UserEntity.convertToResponseDto() = UserResponse(
     email = this.email,
     phone = this.phone,
     createdAt = this.createdAt,
+    updatedAt = this.updatedAt,
     role = role.name
 )
+

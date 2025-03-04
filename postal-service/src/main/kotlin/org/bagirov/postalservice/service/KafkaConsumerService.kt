@@ -3,6 +3,7 @@ package org.bagirov.postalservice.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
+import org.bagirov.postalservice.dto.PostmanUpdatedEventDto
 import org.bagirov.postalservice.dto.UserEventDto
 import org.bagirov.postalservice.entity.PostmanEntity
 import org.bagirov.postalservice.props.Role
@@ -19,7 +20,7 @@ class KafkaConsumerService (
 
     private val log = KotlinLogging.logger {}
 
-    @KafkaListener(topics = ["user-events"], groupId = "postal-service-group")
+    @KafkaListener(topics = ["user-created-events"], groupId = "postal-service-group")
     fun consumeUserCreatedEvent(message : String){
         try {
             val userEvent = objectMapper.readValue(message, UserEventDto::class.java)
@@ -50,5 +51,19 @@ class KafkaConsumerService (
         }
     }
 
+    @KafkaListener(topics = ["postman-updated-events"], groupId = "postal-service-group")
+    fun consumeUserUpdatedEvent(message: String) {
+        try {
+            val event = objectMapper.readValue(message, PostmanUpdatedEventDto::class.java)
+
+            postmanRepository.findByUserId(event.userId)?.let { postman ->
+                postmanRepository.save(postman)
+                log.info("Updated postman with userId ${event.userId}")
+            } ?: log.warn("Postman with userId ${event.userId} not found")
+
+        } catch (e: Exception) {
+            log.error("Ошибка обработки Kafka-сообщения о обновлении почтальона: ${e.message}", e)
+        }
+    }
 
 }
