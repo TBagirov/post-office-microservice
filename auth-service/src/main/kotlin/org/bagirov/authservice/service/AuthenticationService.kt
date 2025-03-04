@@ -12,7 +12,7 @@ import org.bagirov.authservice.entity.UserEntity
 import org.bagirov.authservice.repository.RefreshTokenRepository
 import org.bagirov.authservice.repository.RoleRepository
 import org.bagirov.authservice.repository.UserRepository
-import org.bagirov.authservice.utill.convertToResponseDto
+import org.bagirov.authservice.utill.convertToResponseEventDto
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseCookie
 import org.springframework.security.authentication.AuthenticationManager
@@ -64,7 +64,7 @@ class AuthenticationService(
     }
 
     @Transactional
-    fun registration(request: RegistrationRequest, response: HttpServletResponse): AuthenticationResponse {
+    fun registration(request: RegistrationRequest, response: HttpServletResponse, roleName: String = "GUEST"): AuthenticationResponse {
         log.info { "Starting registration process for user: ${request.username}" }
         if (!isValidRegistrationCredentials(request)) {
             log.warn { "Invalid registration credentials provided" }
@@ -76,11 +76,11 @@ class AuthenticationService(
             throw IllegalArgumentException("Пользователь с таким username уже существует")
         }
 
-        val roleGuest = roleRepository.findByName("GUEST")!!
+        val role = roleRepository.findByName(roleName)!!
         val user = UserEntity(
             username = request.username,
             password = passwordEncoder.encode(request.password),
-            role = roleGuest,
+            role = role,
             name = request.name,
             surname = request.surname,
             patronymic = request.patronymic,
@@ -99,7 +99,8 @@ class AuthenticationService(
         refreshTokenRepository.save(RefreshTokenEntity(user = user, token = refreshToken))
         log.info { "Generated refresh token for newly registered user: ${request.username}" }
 
-        kafkaProducerService.sendUserCreatedEvent(user.convertToResponseDto())
+        kafkaProducerService.sendUserCreatedEvent(user.convertToResponseEventDto())
+
         log.info { "Sent Kafka event for user registration: ${request.username}" }
 
         return AuthenticationResponse(accessToken = accessToken, username = user.username, id = user.id!!)

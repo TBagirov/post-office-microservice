@@ -11,6 +11,11 @@
           <package value="org.bagirov.authservice" />
         </packages>
       </persistence-unit>
+      <persistence-unit moduleName="postal-service.main" name="Default">
+        <packages>
+          <package value="org.bagirov.postalservice" />
+        </packages>
+      </persistence-unit>
     </persistence-units>
   </component>
 </project>
