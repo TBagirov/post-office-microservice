@@ -2,8 +2,10 @@ package org.bagirov.postalservice.service
 
 import org.bagirov.postalservice.dto.request.StreetRequest
 import org.bagirov.postalservice.dto.request.StreetUpdateRequest
+import org.bagirov.postalservice.dto.response.StreetDistrictResponse
 import org.bagirov.postalservice.dto.response.StreetResponse
 import org.bagirov.postalservice.entity.RegionEntity
+import org.bagirov.postalservice.repository.DistrictRepository
 import org.bagirov.postalservice.repository.RegionRepository
 import org.bagirov.postalservice.repository.StreetRepository
 import org.bagirov.postalservice.utill.convertToEntity
@@ -16,6 +18,7 @@ import java.util.*
 class StreetService(
     private val streetRepository: StreetRepository,
     private val regionRepository: RegionRepository,
+    private val districtRepository: DistrictRepository,
     private val regionService: RegionService
 ) {
 
@@ -26,6 +29,24 @@ class StreetService(
 
     fun getAll(): List<StreetResponse> =
         streetRepository.findAll().map { it.convertToResponseDto() }
+
+    @Transactional
+    fun getStreetAndDistrict(streetName: String): StreetDistrictResponse {
+
+        // Получаем или создаем улицу по имени
+        val street: StreetResponse = streetRepository.findByName(streetName)
+            ?.convertToResponseDto()
+            ?: save(StreetRequest(streetName))
+
+        val districtRes = districtRepository.findByRegionName(street.regionName!!)
+            .orElseThrow {NoSuchElementException("Нет районов для региона ${street.regionName}")}
+            .random()
+
+        return StreetDistrictResponse(
+            streetId = street.id,
+            districtId = districtRes.id!!
+        )
+    }
 
     @Transactional
     fun save(streetRequest: StreetRequest): StreetResponse {

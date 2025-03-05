@@ -4,11 +4,14 @@ import io.jsonwebtoken.JwtException
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
+import org.bagirov.authservice.dto.UserBecomeSubscriberEventDto
 import org.bagirov.authservice.dto.request.AuthenticationRequest
-import org.bagirov.authservice.dto.response.AuthenticationResponse
+import org.bagirov.authservice.dto.request.BecomeSubscriberRequest
 import org.bagirov.authservice.dto.request.RegistrationRequest
+import org.bagirov.authservice.dto.response.AuthenticationResponse
 import org.bagirov.authservice.entity.RefreshTokenEntity
 import org.bagirov.authservice.entity.UserEntity
+import org.bagirov.authservice.props.Role
 import org.bagirov.authservice.repository.RefreshTokenRepository
 import org.bagirov.authservice.repository.RoleRepository
 import org.bagirov.authservice.repository.UserRepository
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 @Service
 class AuthenticationService(
@@ -31,7 +35,9 @@ class AuthenticationService(
     private val authenticationManager: AuthenticationManager,
     private val passwordEncoder: PasswordEncoder,
     private val refreshTokenRepository: RefreshTokenRepository,
-    private val kafkaProducerService: KafkaProducerService
+    private val kafkaProducerService: KafkaProducerService,
+    // Feign-клиент для запроса данных улицы
+    private val postalServiceClient: PostalServiceClient
 ) {
 
     private val log = KotlinLogging.logger {}
@@ -104,6 +110,37 @@ class AuthenticationService(
         log.info { "Sent Kafka event for user registration: ${request.username}" }
 
         return AuthenticationResponse(accessToken = accessToken, username = user.username, id = user.id!!)
+    }
+
+    @Transactional
+    fun becomeSubscriber(currentUser: UserEntity, request: BecomeSubscriberRequest) {
+
+        // Ищем пользователя
+        val user = userRepository.findById(currentUser.id!!)
+            .orElseThrow { IllegalArgumentException("Запрос от несуществующего пользователя") }
+
+
+        val roleSubscriber = roleRepository.findByName(Role.SUBSCRIBER)
+            ?: throw java.util.NoSuchElementException("Роли ${Role.SUBSCRIBER} нет в базе данных!")
+
+        // Запрашиваем у PostalService `streetId` и `districtId`
+        val postalData = postalServiceClient.getStreetAndDistrict(request.streetName)
+
+        // Обновляем роль на SUBSCRIBER
+        user.role = roleSubscriber
+        userRepository.save(user)
+
+        // Отправляем событие в Kafka
+        val event = UserBecomeSubscriberEventDto(
+            userId = user.id!!,
+            streetId = postalData.streetId,
+            districtId = postalData.districtId,
+            building = request.building,
+            subAddress = request.subAddress,
+            createdAt = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
+        )
+
+        kafkaProducerService.sendUserBecameSubscriberEvent(event)
     }
 
     fun logout(token: String, response: HttpServletResponse): Map<String, String> {
