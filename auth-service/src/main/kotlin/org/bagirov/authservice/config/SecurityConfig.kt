@@ -20,7 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class SecurityConfig(
     private val userDetailsService: UserDetailsService,
     private val jwtService: JwtService,
-    private val customAccessDeniedHandler: CustomAccessDeniedHandler,
+    private val customAccessDeniedHandler: CustomAccessDeniedHandler
 ) {
 
     @Bean
@@ -32,7 +32,6 @@ class SecurityConfig(
                     .requestMatchers("api/auth/registration-postman").hasAuthority(Role.ADMIN)
                     .requestMatchers("api/auth/become-subscriber").hasAuthority(Role.GUEST)
                     .requestMatchers("/api/auth/user").hasAuthority(Role.ADMIN)
-                    .requestMatchers("/api/auth/user/**").hasAuthority(Role.ADMIN)
                     .requestMatchers(
                         "/api/auth/**",
                     )

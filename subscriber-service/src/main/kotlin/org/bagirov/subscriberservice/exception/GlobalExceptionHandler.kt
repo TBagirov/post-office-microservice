@@ -1,4 +1,4 @@
-package org.bagirov.authservice.exception
+package org.bagirov.subscriberservice.exception
 
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.JwtException
@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import java.lang.reflect.InvocationTargetException
 import java.nio.file.AccessDeniedException
 
 @RestControllerAdvice
@@ -73,6 +74,21 @@ class GlobalExceptionHandler {
         return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
+    // Перехватываем InvocationTargetException
+    @ExceptionHandler(InvocationTargetException::class)
+    fun handleIInvocationTargetException(ex: InvocationTargetException): ResponseEntity<ErrorResponse> {
+        val rootCause = ex.targetException // Достаем настоящее исключение
+        log.error("ROOT CAUSE InvocationTargetException: ${rootCause.message}", rootCause)
+
+        log.error {"InvocationTargetException:  ${ex.printStackTrace()}" }
+        val errorResponse = ErrorResponse(
+            error = "Error when calling the method through reflection",
+            message = ex.message,
+            status = HttpStatus.BAD_REQUEST.value()
+        )
+        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
+    }
+
     // Перехватываем IllegalArgumentException
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<ErrorResponse> {
@@ -118,11 +134,12 @@ class GlobalExceptionHandler {
         log.error {"Exception:  ${ex.printStackTrace()}" }
 
         val errorResponse = ErrorResponse(
-            error = "Unexpected Error",
+            error = "Unexpected error",
             message = ex.message,
             status = HttpStatus.BAD_REQUEST.value()
         )
         return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
     }
+
 
 }

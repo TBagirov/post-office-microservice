@@ -1,6 +1,7 @@
 package org.bagirov.subscriberservice.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
 import org.bagirov.subscriberservice.dto.UserBecomeSubscriberEventDto
 import org.bagirov.subscriberservice.entity.SubscriberEntity
@@ -9,6 +10,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.ZoneOffset
+import java.util.*
 
 @Service
 class KafkaConsumerService (
@@ -33,6 +35,23 @@ class KafkaConsumerService (
 
         subscriberRepository.save(subscriber)
         log.info("Создан подписчик: ${event.userId}")
+    }
+
+
+    @KafkaListener(topics = ["user-deleted-events"], groupId = "subscriber-service-group")
+    fun consumeUserDeletedEvent(message: String) {
+        try {
+            val event = objectMapper.readValue<Map<String, String>>(message)
+            val userId = UUID.fromString(event["id"] ?: throw IllegalArgumentException("userId is missing"))
+
+            subscriberRepository.findByUserId(userId)?.let { subscriber ->
+                subscriberRepository.delete(subscriber)
+                log.info("Удален почтальон, связанный с пользователем $userId")
+            } ?: log.warn("Почтальон с userId $userId не найден")
+
+        } catch (e: Exception) {
+            log.error("Ошибка обработки Kafka-сообщения о удалении пользователя: ${e.message}", e)
+        }
     }
 
 }

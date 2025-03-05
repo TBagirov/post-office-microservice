@@ -1,9 +1,11 @@
 package org.bagirov.authservice.service
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
 import io.jsonwebtoken.JwtException
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
+import org.bagirov.authservice.client.PostalServiceClient
 import org.bagirov.authservice.dto.UserBecomeSubscriberEventDto
 import org.bagirov.authservice.dto.request.AuthenticationRequest
 import org.bagirov.authservice.dto.request.BecomeSubscriberRequest
@@ -113,6 +115,7 @@ class AuthenticationService(
     }
 
     @Transactional
+    @CircuitBreaker(name = "postalService", fallbackMethod = "fallbackUpdateSubscriber")
     fun becomeSubscriber(currentUser: UserEntity, request: BecomeSubscriberRequest) {
 
         // Ищем пользователя
@@ -141,6 +144,11 @@ class AuthenticationService(
         )
 
         kafkaProducerService.sendUserBecameSubscriberEvent(event)
+    }
+    // fallback метод, если PostalService недоступен
+    fun fallbackUpdateSubscriber(user: UserEntity, request: BecomeSubscriberRequest, ex: Throwable) {
+        log.error("Circuit Breaker activated for postal-service! Reason: ${ex.message}", ex)
+        throw IllegalStateException("Circuit Breaker: Postal Service is currently unavailable: ${ex.message}. Please try again later.")
     }
 
     fun logout(token: String, response: HttpServletResponse): Map<String, String> {

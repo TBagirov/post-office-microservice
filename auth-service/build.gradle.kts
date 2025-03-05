@@ -38,6 +38,7 @@ dependencies {
 
     // Kafka
     implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
     testImplementation("org.springframework.kafka:spring-kafka-test")
 
     // JJWT

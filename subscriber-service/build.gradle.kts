@@ -33,12 +33,14 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 
     // SWAGGER
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.3")
 
     // JJWT
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+    implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 

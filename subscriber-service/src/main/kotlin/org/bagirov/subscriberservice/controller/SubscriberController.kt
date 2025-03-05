@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
 import org.bagirov.subscriberservice.config.CustomUserDetails
+import org.bagirov.subscriberservice.dto.request.SubscriberUpdateRequest
 import org.bagirov.subscriberservice.dto.response.SubscriberResponse
 import org.bagirov.subscriberservice.service.SubscriberService
 import org.springframework.http.ResponseEntity
@@ -45,18 +46,20 @@ class SubscriberController(
     }
 
 
-//
-//    @PutMapping("/update")
-//    @Operation(
-//        summary = "Редактирование подписчика по id",
-//        description = "Редактирование данных подписчика по id"
-//    )
-//    fun update(@AuthenticationPrincipal user: CustomUserDetails,
-//               @RequestBody subscriber: SubscriberUpdateRequest): ResponseEntity<SubscriberResponse> {
-//        log.info { "Request update Subscriber" }
-//        return ResponseEntity.ok(subscriberService.update(user, subscriber))
-//    }
-//
+
+    @PutMapping("/update")
+    @Operation(
+        summary = "Редактирование подписчика по id",
+        description = "Редактирование данных подписчика по id"
+    )
+    fun update(@AuthenticationPrincipal user: CustomUserDetails,
+               @RequestBody subscriber: SubscriberUpdateRequest):
+            ResponseEntity<SubscriberResponse>
+    {
+        log.info { "Request update Subscriber" }
+        return ResponseEntity.ok(subscriberService.update(user, subscriber))
+    }
+
 //
 //    @DeleteMapping("/delete")
 //    @Operation(
