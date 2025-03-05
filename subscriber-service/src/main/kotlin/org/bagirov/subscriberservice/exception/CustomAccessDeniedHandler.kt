@@ -1,4 +1,4 @@
-package org.bagirov.authservice.exception
+package org.bagirov.subscriberservice.exception
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse

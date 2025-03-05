@@ -4,8 +4,10 @@ import io.swagger.v3.oas.annotations.Operation
 import mu.KotlinLogging
 import org.bagirov.authservice.dto.request.UserUpdateRequest
 import org.bagirov.authservice.dto.response.UserResponse
+import org.bagirov.authservice.entity.UserEntity
 import org.bagirov.authservice.service.UserService
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -37,15 +39,19 @@ class UserController(
         ResponseEntity.ok(userService.getAll())
 
     @PutMapping("/update")
-    fun updatePostman(@RequestBody request: UserUpdateRequest): ResponseEntity<UserResponse> {
+    fun update(@AuthenticationPrincipal user: UserEntity,
+               @RequestBody request: UserUpdateRequest):
+            ResponseEntity<UserResponse>
+    {
         log.info {"Request update User"}
-        return ResponseEntity.ok(userService.update(request))
+        return ResponseEntity.ok(userService.update(user, request))
     }
 
     @DeleteMapping("/delete")
     @Operation(
         summary = "Удаление пользователя по id",
-        description = "Удаление пользователя по id")
+        description = "Удаление пользователя по id"
+    )
     fun delete(@RequestParam("id") id: UUID):
             ResponseEntity<UserResponse>
     {

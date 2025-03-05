@@ -2,6 +2,7 @@ package org.bagirov.subscriberservice.config
 
 
 import org.bagirov.authservice.props.Role
+import org.bagirov.subscriberservice.exception.CustomAccessDeniedHandler
 import org.bagirov.subscriberservice.service.JwtService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -12,7 +13,8 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 @Configuration
 class SecurityConfig(
-    private val jwtService: JwtService
+    private val jwtService: JwtService,
+    private val customAccessDeniedHandler: CustomAccessDeniedHandler
 ) {
 
     @Bean
@@ -26,6 +28,9 @@ class SecurityConfig(
                 it.anyRequest().authenticated()
             }
             .addFilterBefore(JwtAuthenticationFilter(jwtService), BasicAuthenticationFilter::class.java)
+            .exceptionHandling { exceptions ->
+                exceptions.accessDeniedHandler(customAccessDeniedHandler) // Используем кастомный обработчик
+            }
             .build()
 
 
