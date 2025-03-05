@@ -2,7 +2,7 @@ version: '3.7'
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
-    container_name: postoffice-zookeeper
+    container_name: post-office-microservice-zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
     volumes:
@@ -10,7 +10,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:latest
-    container_name: postoffice-kafka
+    container_name: post-office-microservice-kafka
     depends_on:
       - zookeeper
     environment:

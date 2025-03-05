@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
 import org.bagirov.postalservice.dto.request.StreetRequest
 import org.bagirov.postalservice.dto.request.StreetUpdateRequest
+import org.bagirov.postalservice.dto.response.StreetDistrictResponse
 import org.bagirov.postalservice.dto.response.StreetResponse
 import org.bagirov.postalservice.service.StreetService
 import org.springframework.http.ResponseEntity
@@ -39,6 +40,13 @@ class StreetController(
     fun getAll():ResponseEntity<List<StreetResponse>> {
         log.info {"Request get all Street"}
         return ResponseEntity.ok(streetService.getAll())
+    }
+
+    @GetMapping("/street-info")
+    @Operation(summary = "Получить ID улицы и района", description = "Возвращает ID улицы и случайный ID района в этом регионе")
+    fun getStreetAndDistrict(@RequestParam streetName: String): ResponseEntity<StreetDistrictResponse> {
+        log.info { "Received request for street info: $streetName" }
+        return ResponseEntity.ok(streetService.getStreetAndDistrict(streetName))
     }
 
     @PostMapping()

@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/eureka-server" />
             <option value="$PROJECT_DIR$/gateway-api" />
             <option value="$PROJECT_DIR$/postal-service" />
+            <option value="$PROJECT_DIR$/subscriber-service" />
           </set>
         </option>
       </GradleProjectSettings>
