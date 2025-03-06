@@ -11,12 +11,14 @@ import org.bagirov.publicationservice.repository.PublicationTypeRepository
 import org.bagirov.publicationservice.utill.convertToResponseDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
 @Service
 class PublicationService(
     private val publicationRepository: PublicationRepository,
     private val publicationTypeRepository: PublicationTypeRepository,
+    private val minioService: MinioService
 ) {
 
     fun getById(id: UUID): PublicationResponse =
@@ -39,6 +41,7 @@ class PublicationService(
             title = publication.title,
             type = publicationType,
             author = publication.author,
+            coverUrl = publication.coverUrl,
             description = publication.description,
             price = publication.price
         )
@@ -85,9 +88,23 @@ class PublicationService(
                 it.add(savedPublication)
             }
         }
-
         return savedPublication.convertToResponseDto()
+    }
 
+    fun uploadCover(publicationId: UUID, file: MultipartFile): String {
+        val publication = publicationRepository.findById(publicationId)
+            .orElseThrow { NoSuchElementException("Publication not found") }
+
+        // Удаляем старую обложку, если есть
+        publication.coverUrl?.let { minioService.deleteFile(it) }
+
+        // Загружаем новую обложку
+        val coverUrl = minioService.uploadFile(file)
+        publication.coverUrl = coverUrl
+
+        publicationRepository.save(publication)
+
+        return coverUrl
     }
 
     @Transactional

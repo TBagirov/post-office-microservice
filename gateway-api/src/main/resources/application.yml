@@ -20,7 +20,6 @@ gateway:
       path: /api/publication/**
       uri: lb://publication-service
 
-
 eureka:
   client:
     service-url:

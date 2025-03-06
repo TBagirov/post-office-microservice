@@ -33,6 +33,9 @@ dependencies {
 	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 	implementation("org.springframework.kafka:spring-kafka")
 
+	//MINIO
+	implementation("io.minio:minio:8.5.7")
+
 	// LOG
 	implementation("io.github.microutils:kotlin-logging:3.0.5")
 
