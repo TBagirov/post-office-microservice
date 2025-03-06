@@ -8,6 +8,7 @@ data class PublicationRequest(
     val title: String,
     val author: String,
     val description: String?,
+    val coverUrl: String?,
     val type: String,
     val price: BigDecimal
 )

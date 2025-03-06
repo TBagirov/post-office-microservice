@@ -18,6 +18,7 @@ fun PublicationEntity.convertToResponseDto() = PublicationResponse(
     index = this.index,
     author = this.author,
     description = this.description!!,
+    coverUrl = this.coverUrl,
     title = this.title,
     publicationType = this.type.name,
     price = this.price

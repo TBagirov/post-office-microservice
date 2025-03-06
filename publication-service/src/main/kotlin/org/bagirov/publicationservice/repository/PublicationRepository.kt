@@ -9,4 +9,6 @@ import java.util.*
 @Repository
 interface PublicationRepository: JpaRepository<PublicationEntity, UUID> {
 
+    fun existsByCoverUrl(coverUrl: String): Boolean
+
 }

@@ -10,6 +10,7 @@ import org.bagirov.publicationservice.dto.response.PublicationResponse
 import org.bagirov.publicationservice.service.PublicationService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
 @CrossOrigin(origins = arrayOf("http://localhost:3000"))
@@ -41,6 +42,16 @@ class PublicationController(
         return ResponseEntity.ok(publicationService.getAll())
     }
 
+    @PostMapping("/upload-cover/{id}")
+    @Operation(summary = "Загрузка обложки", description = "Загружает изображение обложки в MinIO")
+    fun uploadCover(
+        @PathVariable id: UUID,
+        @RequestParam("file") file: MultipartFile
+    ): ResponseEntity<String> {
+        val coverUrl = publicationService.uploadCover(id, file)
+        return ResponseEntity.ok(coverUrl)
+    }
+
     @PostMapping()
     @Operation(
         summary = "Добавление издания",
@@ -60,6 +71,8 @@ class PublicationController(
         log.info {"Request update Publication by id: ${publication.id}"}
         return ResponseEntity.ok(publicationService.update(publication))
     }
+
+
 
     @DeleteMapping()
     @Operation(

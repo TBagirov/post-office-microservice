@@ -9,6 +9,7 @@ data class PublicationResponse (
     val title: String,
     val author: String,
     val description: String?,
+    val coverUrl: String?,
     val publicationType: String,
     val price: BigDecimal
 )

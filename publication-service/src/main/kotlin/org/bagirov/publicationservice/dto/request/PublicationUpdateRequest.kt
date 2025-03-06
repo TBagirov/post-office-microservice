@@ -9,6 +9,7 @@ data class PublicationUpdateRequest(
     val index: String?,
     val title: String?,
     val description: String?,
+    val coverUrl: String?,
     val author: String?,
     val typeName: String?,
     val price: BigDecimal?

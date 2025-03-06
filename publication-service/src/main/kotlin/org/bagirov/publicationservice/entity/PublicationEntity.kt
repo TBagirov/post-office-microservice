@@ -19,6 +19,9 @@ data class PublicationEntity(
 
     var description: String? = null,
 
+    @Column(name = "cover_url", nullable = true)
+    var coverUrl: String? = null,
+
     @Column(nullable = false)
     var price: BigDecimal,
 
