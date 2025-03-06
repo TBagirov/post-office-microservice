@@ -1,12 +1,11 @@
-package org.bagirov.subscriberservice.config
+package org.bagirov.publicationservice.config
 
 
-import org.bagirov.subscriberservice.props.Role
-import org.bagirov.subscriberservice.exception.CustomAccessDeniedHandler
-import org.bagirov.subscriberservice.service.JwtService
+import org.bagirov.publicationservice.exception.CustomAccessDeniedHandler
+import org.bagirov.publicationservice.props.Role
+import org.bagirov.publicationservice.service.JwtService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
@@ -23,8 +22,8 @@ class SecurityConfig(
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
-                it.requestMatchers(HttpMethod.PUT, "/api/subscriber/update").hasAuthority(Role.SUBSCRIBER)
-                it.requestMatchers(HttpMethod.GET, "/api/subscriber/**").hasAnyAuthority(Role.SUBSCRIBER, Role.ADMIN)
+                it.requestMatchers( "/api/publication/**").hasAuthority(Role.ADMIN)
+                it.requestMatchers( "/api/publication-type/**").hasAuthority(Role.ADMIN)
                 it.anyRequest().authenticated()
             }
             .addFilterBefore(JwtAuthenticationFilter(jwtService), BasicAuthenticationFilter::class.java)

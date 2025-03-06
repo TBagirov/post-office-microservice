@@ -3,6 +3,7 @@ services:
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: post-office-microservice-zookeeper
+    restart: always
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
     volumes:
@@ -24,8 +25,11 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka/data
 
+
 volumes:
   zookeeper_data:
+
     driver: local
   kafka_data:
     driver: local
+
