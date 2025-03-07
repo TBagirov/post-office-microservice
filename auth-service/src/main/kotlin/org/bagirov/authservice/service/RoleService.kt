@@ -3,7 +3,7 @@ package org.bagirov.authservice.service
 import org.bagirov.authservice.dto.response.RoleResponse
 import org.bagirov.authservice.entity.RoleEntity
 import org.bagirov.authservice.repository.RoleRepository
-import org.bagirov.authservice.utill.convertToResponseDto
+import org.bagirov.authservice.utill.convertToResponseEventDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -15,16 +15,16 @@ class RoleService(
     fun getById(id: UUID): RoleResponse =
         roleRepository.findById(id)
             .orElseThrow { NoSuchElementException("Role with ID ${id} not found") }
-            .convertToResponseDto()
+            .convertToResponseEventDto()
 
     fun getAll(): List<RoleResponse> =
-        roleRepository.findAll().map { it.convertToResponseDto() }
+        roleRepository.findAll().map { it.convertToResponseEventDto() }
 
     @Transactional
     fun save(roleName: String) =
         roleRepository.save(
             RoleEntity(name = roleName)
-        ).convertToResponseDto()
+        ).convertToResponseEventDto()
 
     fun delete(id: UUID): RoleResponse {
         val existingRole = roleRepository.findById(id)
@@ -32,6 +32,6 @@ class RoleService(
 
         roleRepository.delete(existingRole)
 
-        return existingRole.convertToResponseDto()
+        return existingRole.convertToResponseEventDto()
     }
 }

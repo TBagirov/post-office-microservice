@@ -31,19 +31,21 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 
     // SWAGGER
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.3")
 
-    // JJWT
-    implementation("io.jsonwebtoken:jjwt-api:0.12.6")
-
     // Kafka
     implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
     testImplementation("org.springframework.kafka:spring-kafka-test")
 
+    // JJWT
+    implementation("io.jsonwebtoken:jjwt-api:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
+
 
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
