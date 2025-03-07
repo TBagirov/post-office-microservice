@@ -1,4 +1,4 @@
-package org.bagirov.subscriberservice.props
+package org.bagirov.publicationservice.props
 
 object Role {
     const val ADMIN = "ADMIN"

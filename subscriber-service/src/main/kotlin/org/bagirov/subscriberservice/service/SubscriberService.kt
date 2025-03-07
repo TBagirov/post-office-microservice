@@ -39,7 +39,6 @@ class SubscriberService(
         val subscriber = subscriberRepository.findByUserId(currentUser.getUserId())
             ?: throw NoSuchElementException("Subscriber not found for user ID ${currentUser.getUserId()}")
 
-
         // Запрос в `PostalService` для получения `streetId` и `districtId`
         val streetDistrict = postalServiceClient.getStreetAndDistrict(subscriberRequest.streetName)
 

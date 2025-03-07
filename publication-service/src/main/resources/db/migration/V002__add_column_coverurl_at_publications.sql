@@ -1,0 +1,1 @@
+ALTER TABLE publications ADD COLUMN cover_url TEXT;
