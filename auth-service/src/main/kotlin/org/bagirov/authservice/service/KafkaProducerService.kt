@@ -12,7 +12,6 @@ import java.util.*
 @Service
 class KafkaProducerService(
     private val kafkaTemplate: KafkaTemplate<String, String>,
-
     private val objectMapper: ObjectMapper
 ) {
 
