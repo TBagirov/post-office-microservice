@@ -10,14 +10,22 @@ gateway:
     - id: auth-service
       path: /api/auth/**
       uri: lb://auth-service
-
-
-
-
+    - id: postal-service
+      path: /api/postal/**
+      uri: lb://postal-service
+    - id: subscriber-service
+      path: /api/subscriber/**
+      uri: lb://subscriber-service
+    - id: publication-service
+      path: /api/publication/**
+      uri: lb://publication-service
 
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
 
+  instance:
+    hostname: localhost    # Принудительно указываем localhost
+    prefer-ip-address: true  # Использовать IP-адрес вместо имени хоста
 

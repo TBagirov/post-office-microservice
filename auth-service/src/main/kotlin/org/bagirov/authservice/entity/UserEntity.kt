@@ -1,8 +1,6 @@
 package org.bagirov.authservice.entity
 
 import jakarta.persistence.*
-import org.bagirov.authservice.entity.RefreshTokenEntity
-import org.bagirov.authservice.entity.RoleEntity
 import org.hibernate.proxy.HibernateProxy
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -41,6 +39,9 @@ data class UserEntity (
 
     @Column(name = "created_at", nullable = false)
     var createdAt: LocalDateTime,
+
+    @Column(name = "updated_at")
+    var updatedAt: LocalDateTime? = null,
 
     @ManyToOne
     @JoinColumn(name = "role_id", nullable = false)

@@ -20,7 +20,6 @@ import javax.crypto.SecretKey
 class JwtService(
     private val jwtProperties: JwtProperties,
     private val userDetailsService: UserDetailsService,
-//    val userService: UserService,
 ) {
     var key: SecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.secret))
 

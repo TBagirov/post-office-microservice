@@ -7,3 +7,6 @@ rootProject.name = "post-office-microservice"
 include("eureka-server")
 include("gateway-api")
 include("auth-service")
+include("postal-service")
+include("subscriber-service")
+include("publication-service")
