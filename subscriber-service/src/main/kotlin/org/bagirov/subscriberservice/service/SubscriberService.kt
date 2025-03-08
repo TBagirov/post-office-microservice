@@ -6,7 +6,9 @@ import org.bagirov.subscriberservice.client.PostalServiceClient
 import org.bagirov.subscriberservice.config.CustomUserDetails
 import org.bagirov.subscriberservice.dto.request.SubscriberUpdateRequest
 import org.bagirov.subscriberservice.dto.response.SubscriberResponse
+import org.bagirov.subscriberservice.dto.response.client.SubscriberResponseClient
 import org.bagirov.subscriberservice.repository.SubscriberRepository
+import org.bagirov.subscriberservice.utill.convertToResponseClientDto
 import org.bagirov.subscriberservice.utill.convertToResponseDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,6 +27,11 @@ class SubscriberService(
             .findById(id)
             .orElseThrow { NoSuchElementException("Subscriber with ID ${id} not found") }
             .convertToResponseDto()
+
+    fun getByUserId(id: UUID): SubscriberResponseClient =
+        subscriberRepository.findByUserId(id)?.convertToResponseClientDto()
+            ?: throw NoSuchElementException("Subscriber with ID ${id} not found")
+
 
     fun getAll(): List<SubscriberResponse> =
         subscriberRepository.findAll().map { it.convertToResponseDto() }
@@ -61,22 +68,7 @@ class SubscriberService(
         throw IllegalStateException("Circuit Breaker: Postal Service is currently unavailable: ${ex.message}. Please try again later.")
     }
 
-//
-//
-//    @Transactional
-//    fun delete(currentUser: UserEntity): SubscriberResponse {
-//        val user = userRepository.findById(currentUser.id!!)
-//            .orElseThrow { IllegalArgumentException("Subscriber with ID ${currentUser.id} not found") }
-//
-//        // Найти существующего подписчика
-//        val existingSubscriber = user.subscriber
-//            ?: throw NoSuchElementException("Subscriber with ID ${currentUser.id} not found")
-//
-//        // Удалить подписчика
-//        userRepository.delete(user)
-//
-//        return existingSubscriber.convertToResponseDto()
-//    }
+
 
 
 }

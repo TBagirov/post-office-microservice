@@ -19,6 +19,9 @@ gateway:
     - id: publication-service
       path: /api/publication/**
       uri: lb://publication-service
+    - id: subscription-service
+      path: /api/subscription/**
+      uri: lb://subscription-service
 
 eureka:
   client:

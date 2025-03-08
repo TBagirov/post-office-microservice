@@ -1,4 +1,4 @@
-package org.bagirov.subscriberservice.dto.response
+package org.bagirov.subscriberservice.dto.response.client
 
 import java.util.*
 

@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import mu.KotlinLogging
 import org.bagirov.subscriberservice.service.JwtService
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -19,11 +20,15 @@ class JwtAuthenticationFilter(
     private val jwtService: JwtService
 ) : OncePerRequestFilter() {
 
+    private val log = KotlinLogging.logger {}
+
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
+        log.info("JwtAuthenticationFilter executing for ${request.requestURI}")
+
         try {
             val authHeader = request.getHeader("Authorization")
 
