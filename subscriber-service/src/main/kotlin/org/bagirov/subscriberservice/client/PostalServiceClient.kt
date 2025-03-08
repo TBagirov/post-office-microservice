@@ -1,13 +1,13 @@
 package org.bagirov.subscriberservice.client
 
-import org.bagirov.subscriberservice.dto.response.StreetDistrictResponse
+import org.bagirov.subscriberservice.dto.response.client.StreetDistrictResponse
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 
 @FeignClient(
     name = "postal-service",
-    fallback = PostalServiceClientFallback::class
+    fallback = PostalServiceClientFallbackFactory::class
 )
 interface PostalServiceClient {
     @GetMapping("/api/postal/street/street-info")
