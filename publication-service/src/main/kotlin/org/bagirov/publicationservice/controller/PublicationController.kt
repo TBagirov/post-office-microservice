@@ -59,7 +59,14 @@ class PublicationController(
         }
         log.info { "Request Subscriber by id: $userId" }
 
-        return ResponseEntity.ok(PublicationResponseClient(publicationService.getById(userId).id))
+        val pub = publicationService.getById(userId)
+
+        return ResponseEntity.ok(
+            PublicationResponseClient(
+                pub.id,
+                pub.price
+            )
+        )
     }
 
     @PostMapping("/upload-cover/{id}")
