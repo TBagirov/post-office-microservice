@@ -9,5 +9,6 @@ fun SubscriptionEntity.convertToResponseDto() = SubscriptionResponse(
     publicationId = publicationId,
     startDate = this.startDate,
     duration = this.duration,
-    endDate = getEndDate()
+    endDate = getEndDate(),
+    status = this.status
 )

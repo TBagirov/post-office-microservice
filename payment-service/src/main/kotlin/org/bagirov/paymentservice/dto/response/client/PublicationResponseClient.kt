@@ -1,4 +1,4 @@
-package org.bagirov.subscriptionservice.dto.response.client
+package org.bagirov.paymentservice.dto.response.client
 
 import java.math.BigDecimal
 import java.util.UUID
