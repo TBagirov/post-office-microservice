@@ -1,9 +1,10 @@
 spring:
   application:
-    name: subscription-service
+    name: payment-service
+
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/po-subscription
+    url: jdbc:postgresql://localhost:5432/po-payment
     username: postgres
     password: PosTer231
     driver-class-name: org.postgresql.Driver
@@ -17,7 +18,7 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
-      group-id: subscription-service-group
+      group-id: payment-service-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -34,7 +35,7 @@ eureka:
     prefer-ip-address: true  # ???????????? IP-????? ?????? ????? ?????
 
 server:
-  port: 8085
+  port: 8086
 
 internal:
   api-secret: my-super-secret-key
