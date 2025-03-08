@@ -6,11 +6,14 @@ import mu.KotlinLogging
 import org.bagirov.subscriptionservice.client.PublicationServiceClient
 import org.bagirov.subscriptionservice.client.SubscriberServiceClient
 import org.bagirov.subscriptionservice.config.CustomUserDetails
+import org.bagirov.subscriptionservice.dto.SubscriptionCreatedEvent
 import org.bagirov.subscriptionservice.dto.request.SubscriptionRequest
 import org.bagirov.subscriptionservice.dto.response.SubscriptionResponse
 import org.bagirov.subscriptionservice.entity.SubscriptionEntity
+import org.bagirov.subscriptionservice.props.SubscriptionStatus
 import org.bagirov.subscriptionservice.repository.SubscriptionRepository
 import org.bagirov.subscriptionservice.utill.convertToResponseDto
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -20,7 +23,8 @@ import java.util.*
 class SubscriptionService(
     private val subscriptionRepository: SubscriptionRepository,
     private val subscriberServiceClient: SubscriberServiceClient,
-    private val publicationServiceClient: PublicationServiceClient
+    private val publicationServiceClient: PublicationServiceClient,
+    private val kafkaProducerService: KafkaProducerService
 ) {
 
     private val log = KotlinLogging.logger {}
@@ -49,22 +53,53 @@ class SubscriptionService(
     fun save(currentUser: CustomUserDetails, request: SubscriptionRequest): SubscriptionResponse {
 
         val tempSubscriber = subscriberServiceClient.getSubscriber(currentUser.getUserId())
-
         val tempPublication = publicationServiceClient.getPublication(request.publicationId)
-
 
 
         val subscriptionNew = SubscriptionEntity(
             subscriberId = tempSubscriber.subscriberId,
             publicationId = tempPublication.id,
             duration = request.duration,
+            status =  SubscriptionStatus.PENDING_PAYMENT
         )
 
         val subscriptionSave: SubscriptionEntity = subscriptionRepository.save(subscriptionNew)
 
+        // Отправляем событие в Kafka для обработки оплаты
+        val event = SubscriptionCreatedEvent(
+            subscriptionId = subscriptionSave.id!!,
+            subscriberId = subscriptionSave.subscriberId,
+            publicationId = subscriptionSave.publicationId,
+            duration = subscriptionSave.duration
+        )
+        kafkaProducerService.sendSubscriptionCreatedEvent(event)
+
         return subscriptionSave.convertToResponseDto()
     }
 
+    @Transactional
+    fun updateSubscriptionStatus(subscriptionId: UUID, status: SubscriptionStatus) {
+        val subscription = subscriptionRepository.findById(subscriptionId)
+            .orElseThrow { IllegalArgumentException("Subscription not found: $subscriptionId") }
+
+        subscription.status = status
+        subscriptionRepository.save(subscription)
+
+        log.info("Обновлен статус подписки ${subscriptionId}: $status")
+    }
+
+    @Scheduled(fixedRate = 300_000) // Запуск каждые 5 минут (300000 мс)
+    @Transactional
+    fun cleanupUnpaidSubscriptions() {
+        val expirationTime = LocalDateTime.now().minusMinutes(20)
+
+        val expiredSubscriptions = subscriptionRepository.findByStatusAndStartDateBefore(
+            SubscriptionStatus.PENDING_PAYMENT, expirationTime
+        ) ?: return
+
+        log.warn { "Удаление ${expiredSubscriptions.size} неоплаченных подписок..." }
+        subscriptionRepository.deleteAll(expiredSubscriptions)
+    }
 
 //    @Transactional
 //    @CircuitBreaker(name = "publicationService", fallbackMethod = "fallbackUpdateSubscription")

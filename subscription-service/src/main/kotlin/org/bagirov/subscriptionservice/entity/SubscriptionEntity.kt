@@ -1,6 +1,7 @@
 package org.bagirov.subscriptionservice.entity
 
 import jakarta.persistence.*
+import org.bagirov.subscriptionservice.props.SubscriptionStatus
 import org.hibernate.proxy.HibernateProxy
 import java.time.LocalDateTime
 import java.util.*
@@ -21,7 +22,11 @@ data class SubscriptionEntity(
     var startDate: LocalDateTime = LocalDateTime.now(),
 
     @Column(name="duration", nullable = false)
-    val duration: Int, // Используем Period для хранения срока
+    val duration: Int,
+
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING) // ✅ Теперь enum будет храниться в виде строки
+    var status: SubscriptionStatus = SubscriptionStatus.PENDING_PAYMENT,
 
     @Column(name="created_at", nullable = false)
     val createdAt: LocalDateTime = LocalDateTime.now(),
