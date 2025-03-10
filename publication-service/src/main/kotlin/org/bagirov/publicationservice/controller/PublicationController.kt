@@ -64,7 +64,8 @@ class PublicationController(
         return ResponseEntity.ok(
             PublicationResponseClient(
                 pub.id,
-                pub.price
+                pub.price,
+                pub.title
             )
         )
     }

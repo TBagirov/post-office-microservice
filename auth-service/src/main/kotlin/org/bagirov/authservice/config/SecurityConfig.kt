@@ -31,7 +31,8 @@ class SecurityConfig(
                 authorizationManagerRequestMatcherRegistry
                     .requestMatchers("api/auth/registration-postman").hasAuthority(Role.ADMIN)
                     .requestMatchers("api/auth/become-subscriber").hasAuthority(Role.GUEST)
-                    .requestMatchers("/api/auth/user").hasAuthority(Role.ADMIN)
+                    .requestMatchers("/api/auth/user/details/**").permitAll()
+                    .requestMatchers("/api/auth/user/**").hasAuthority(Role.ADMIN)
                     .requestMatchers(
                         "/api/auth/**",
                     )
