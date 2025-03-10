@@ -39,6 +39,7 @@ class AuthenticationController(
         return ResponseEntity.ok(authService.registration(request, response))
     }
 
+
     @PostMapping("/registration-postman")
     @Operation(summary = "Регистрация пользователя")
     fun registrationPostman(@RequestBody request: RegistrationRequest, response: HttpServletResponse):
@@ -78,6 +79,8 @@ class AuthenticationController(
         logger.info {"Request to refresh"}
         return ResponseEntity.ok(authService.refresh(token, response))
     }
+
+
 
 
 
