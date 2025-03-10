@@ -53,6 +53,7 @@ class NotificationService(
                 "Назначен новый район",
                 "postman-assigned.html",
                 mapOf(
+                    "username" to event.username,
                     "districtName" to event.districtName
                 )
             )

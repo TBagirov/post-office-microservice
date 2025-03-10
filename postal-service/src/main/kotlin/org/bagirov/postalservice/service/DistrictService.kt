@@ -1,6 +1,8 @@
 package org.bagirov.postalservice.service
 
 
+import org.bagirov.postalservice.client.AuthServiceClient
+import org.bagirov.postalservice.dto.PostmanAssignedEvent
 import org.bagirov.postalservice.dto.request.DistrictRequest
 import org.bagirov.postalservice.dto.request.DistrictUpdateRequest
 import org.bagirov.postalservice.dto.response.DistrictResponse
@@ -20,7 +22,9 @@ import java.util.UUID
 class DistrictService(
     private val districtRepository: DistrictRepository,
     private val regionRepository: RegionRepository,
-    private val postmanRepository: PostmanRepository
+    private val postmanRepository: PostmanRepository,
+    private val authServiceClient: AuthServiceClient,
+    private val kafkaProducerService: KafkaProducerService
 ) {
 
     fun getById(id: UUID): DistrictResponse = districtRepository.findById(id)
@@ -47,6 +51,17 @@ class DistrictService(
 
         tempRegion?.districts?.add(district)
         tempPostman?.districts?.add(district)
+
+        // **Получаем email и username из AuthService**
+        val userDetails = authServiceClient.getUserDetails(tempPostman!!.userId)
+
+        val event = PostmanAssignedEvent(
+            email = userDetails.email,
+            username = userDetails.username,
+            districtName = tempRegion!!.name
+        )
+
+        kafkaProducerService.sendNotificationEvent(event)
 
         return district.convertToResponseDto()
     }

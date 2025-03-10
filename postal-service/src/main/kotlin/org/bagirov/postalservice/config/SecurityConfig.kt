@@ -1,0 +1,38 @@
+package org.bagirov.postalservice.config
+
+
+import org.bagirov.postalservice.exception.CustomAccessDeniedHandler
+import org.bagirov.postalservice.service.JwtService
+import org.bagirov.postalservice.props.Role
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
+
+@Configuration
+class SecurityConfig(
+    private val jwtService: JwtService,
+    private val customAccessDeniedHandler: CustomAccessDeniedHandler
+) {
+
+    @Bean
+    fun securityFilterChain(http: HttpSecurity) =
+        http
+            .csrf { it.disable() }
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .authorizeHttpRequests {
+
+                //TODO: убрать строку снизу
+                it.requestMatchers(HttpMethod.PUT, "/api/postal/**").hasAuthority(Role.ADMIN)
+                it.anyRequest().authenticated()
+            }
+            .addFilterBefore(JwtAuthenticationFilter(jwtService), BasicAuthenticationFilter::class.java)
+            .exceptionHandling { exceptions ->
+                exceptions.accessDeniedHandler(customAccessDeniedHandler) // Используем кастомный обработчик
+            }
+            .build()
+
+
+}

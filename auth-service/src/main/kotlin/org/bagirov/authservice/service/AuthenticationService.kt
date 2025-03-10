@@ -79,10 +79,21 @@ class AuthenticationService(
             throw IllegalArgumentException("Заполнены не все данные!!!")
         }
 
-        if (userRepository.findAll().any { it.username == request.username }) {
+        if (userRepository.existsByUsername(request.username)) {
             log.warn { "User with username ${request.username} already exists" }
             throw IllegalArgumentException("Пользователь с таким username уже существует")
         }
+
+        if (userRepository.existsByEmail(request.email)) {
+            log.warn { "User with email ${request.email} already exists" }
+            throw IllegalArgumentException("Пользователь с таким email уже существует")
+        }
+
+        if (userRepository.existsByPhone(request.phone)) {
+            log.warn { "User with phone ${request.phone} already exists" }
+            throw IllegalArgumentException("Пользователь с таким phone уже существует")
+        }
+
 
         val role = roleRepository.findByName(roleName)!!
         val user = UserEntity(
