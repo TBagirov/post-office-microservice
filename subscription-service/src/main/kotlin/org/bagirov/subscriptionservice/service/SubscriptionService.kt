@@ -44,7 +44,7 @@ class SubscriptionService(
 
     @Transactional(readOnly = true)
     fun getSubscriptionsByUser(currentUser: CustomUserDetails): List<SubscriptionResponse> {
-        val subscriber = subscriberServiceUserClient.getSubscriber(currentUser.getUserId())
+        val subscriber = subscriberServiceUserClient.getSubscriberByUserId(currentUser.getUserId())
 
         val subscriptions = subscriptionRepository.findBySubscriberId(subscriber.subscriberId)
             ?: throw NoSuchElementException("Subscription with Subscriber ID ${subscriber.subscriberId} not found")
@@ -57,7 +57,7 @@ class SubscriptionService(
     @CircuitBreaker(name = "subscriptionService", fallbackMethod = "fallbackCreateSubscription")
     fun save(currentUser: CustomUserDetails, request: SubscriptionRequest): SubscriptionResponse {
 
-        val tempSubscriber = subscriberServiceUserClient.getSubscriber(currentUser.getUserId())
+        val tempSubscriber = subscriberServiceUserClient.getSubscriberByUserId(currentUser.getUserId())
         val tempPublication = publicationServiceClient.getPublication(request.publicationId)
 
 
@@ -92,7 +92,7 @@ class SubscriptionService(
 
         log.info("Обновлен статус подписки ${subscriptionId}: $status")
 
-        val subscriber = subscriberServiceUserClient.getSubscriberSub(subscription.subscriberId)
+        val subscriber = subscriberServiceUserClient.getSubscriber(subscription.subscriberId)
         val publication = publicationServiceClient.getPublication(subscription.publicationId)
 
         // **Получаем email и username из AuthService**
@@ -159,7 +159,7 @@ class SubscriptionService(
             .orElseThrow { NoSuchElementException("Subscription with ID $id not found") }
 
         // Проверяем, принадлежит ли подписка текущему пользователю
-        val subscriber = subscriberServiceUserClient.getSubscriber(currentUser.getUserId())
+        val subscriber = subscriberServiceUserClient.getSubscriberByUserId(currentUser.getUserId())
 
         if (existingSubscription.subscriberId != subscriber.subscriberId) {
             throw IllegalArgumentException("You don't have permission to delete this subscription")

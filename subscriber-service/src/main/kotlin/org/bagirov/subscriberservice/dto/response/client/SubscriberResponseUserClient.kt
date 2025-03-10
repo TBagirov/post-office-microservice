@@ -2,6 +2,6 @@ package org.bagirov.subscriberservice.dto.response.client
 
 import java.util.UUID
 
-data class SubscriberResponseClient (
+data class SubscriberResponseUserClient (
     val subscriberId: UUID
 )
