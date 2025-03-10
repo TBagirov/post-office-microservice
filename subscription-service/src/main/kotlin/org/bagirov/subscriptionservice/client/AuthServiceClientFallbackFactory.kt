@@ -2,7 +2,6 @@ package org.bagirov.subscriptionservice.client
 
 import mu.KotlinLogging
 import org.bagirov.subscriptionservice.dto.response.client.AuthUserResponseClient
-import org.bagirov.subscriptionservice.dto.response.client.PublicationResponseClient
 import org.springframework.cloud.openfeign.FallbackFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.PathVariable
