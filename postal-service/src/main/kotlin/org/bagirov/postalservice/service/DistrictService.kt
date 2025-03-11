@@ -37,7 +37,7 @@ class DistrictService(
     fun save(districtRequest: DistrictRequest): DistrictResponse {
 
         val tempRegion: RegionEntity? = regionRepository.findById(districtRequest.regionId)
-            .orElseThrow { NoSuchElementException("District with ID ${districtRequest.regionId} not found") }
+            .orElseThrow { NoSuchElementException("Region with ID ${districtRequest.regionId} not found") }
 
         val tempPostman: PostmanEntity? = postmanRepository.findById(districtRequest.postmanId)
             .orElseThrow { NoSuchElementException("Postman with ID ${districtRequest.postmanId} not found") }

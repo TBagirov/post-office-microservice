@@ -74,26 +74,9 @@ class AuthenticationService(
     @Transactional
     fun registration(request: RegistrationRequest, response: HttpServletResponse, roleName: String = "GUEST"): AuthenticationResponse {
         log.info { "Starting registration process for user: ${request.username}" }
-        if (!isValidRegistrationCredentials(request)) {
-            log.warn { "Invalid registration credentials provided" }
-            throw IllegalArgumentException("Заполнены не все данные!!!")
-        }
 
-        if (userRepository.existsByUsername(request.username)) {
-            log.warn { "User with username ${request.username} already exists" }
-            throw IllegalArgumentException("Пользователь с таким username уже существует")
-        }
-
-        if (userRepository.existsByEmail(request.email)) {
-            log.warn { "User with email ${request.email} already exists" }
-            throw IllegalArgumentException("Пользователь с таким email уже существует")
-        }
-
-        if (userRepository.existsByPhone(request.phone)) {
-            log.warn { "User with phone ${request.phone} already exists" }
-            throw IllegalArgumentException("Пользователь с таким phone уже существует")
-        }
-
+        // все проверки, если не выбросилось ни одно исключение, значит можно регистрировать
+        validRequestRegistration(request)
 
         val role = roleRepository.findByName(roleName)!!
         val user = UserEntity(
@@ -135,7 +118,7 @@ class AuthenticationService(
 
 
         val roleSubscriber = roleRepository.findByName(Role.SUBSCRIBER)
-            ?: throw java.util.NoSuchElementException("Роли ${Role.SUBSCRIBER} нет в базе данных!")
+            ?: throw NoSuchElementException("Роли ${Role.SUBSCRIBER} нет в базе данных!")
 
         // Запрашиваем у PostalService `streetId` и `districtId`
         val postalData = postalServiceClient.getStreetAndDistrict(request.streetName)
@@ -202,6 +185,51 @@ class AuthenticationService(
         setRefreshTokenInCookie(response, refreshToken)
         return AuthenticationResponse(accessToken = accessToken, username = user.username, id = user.id!!)
     }
+
+    private fun validRequestRegistration(request: RegistrationRequest){
+
+        if (!isValidRegistrationCredentials(request)) {
+            log.warn { "Invalid registration credentials provided" }
+            throw IllegalArgumentException("Заполнены не все данные!!!")
+        }
+
+        if (!isValidEmail(request.email)) {
+            log.warn { "Invalid email format: ${request.email}" }
+            throw IllegalArgumentException("Некорректный формат email")
+        }
+
+        if (!isValidPhone(request.phone)) {
+            log.warn { "Invalid phone format: ${request.phone}" }
+            throw IllegalArgumentException("Некорректный формат номера телефона (Ожидаемый формат: +7XXXXXXXXXX)")
+        }
+
+        if (userRepository.existsByUsername(request.username)) {
+            log.warn { "User with username ${request.username} already exists" }
+            throw IllegalArgumentException("Пользователь с таким username уже существует")
+        }
+
+        if (userRepository.existsByEmail(request.email)) {
+            log.warn { "User with email ${request.email} already exists" }
+            throw IllegalArgumentException("Пользователь с таким email уже существует")
+        }
+
+        if (userRepository.existsByPhone(request.phone)) {
+            log.warn { "User with phone ${request.phone} already exists" }
+            throw IllegalArgumentException("Пользователь с таким phone уже существует")
+        }
+
+    }
+
+    private fun isValidEmail(email: String): Boolean {
+        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+        return email.matches(emailRegex)
+    }
+
+    private fun isValidPhone(phone: String): Boolean {
+        val phoneRegex = "^\\+7\\d{10}$".toRegex()
+        return phone.matches(phoneRegex)
+    }
+
 
     fun setRefreshTokenInCookie(response: HttpServletResponse, token: String) {
         val cookie = ResponseCookie.from("refreshToken", token)

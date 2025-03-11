@@ -31,6 +31,7 @@ dependencies {
 	implementation("org.springframework.kafka:spring-kafka")
 	implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
 
+
 	//LOG
 	implementation("io.github.microutils:kotlin-logging:3.0.5")
 	implementation("org.springframework.boot:spring-boot-starter-thymeleaf")

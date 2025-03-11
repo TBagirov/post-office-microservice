@@ -24,7 +24,7 @@ class SecurityConfig(
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
                 it.requestMatchers(HttpMethod.GET, "/api/subscription").hasAuthority(Role.ADMIN)
-                it.requestMatchers(HttpMethod.GET, "/api/subscription/**").hasAuthority(Role.SUBSCRIBER)
+                it.requestMatchers("/api/subscription/**").hasAuthority(Role.SUBSCRIBER)
                 it.anyRequest().authenticated()
             }
             .addFilterBefore(JwtAuthenticationFilter(jwtService), BasicAuthenticationFilter::class.java)
