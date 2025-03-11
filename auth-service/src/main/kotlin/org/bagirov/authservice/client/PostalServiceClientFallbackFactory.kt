@@ -4,8 +4,6 @@ import mu.KotlinLogging
 import org.bagirov.authservice.dto.response.StreetDistrictResponse
 import org.springframework.cloud.openfeign.FallbackFactory
 import org.springframework.stereotype.Component
-import org.springframework.web.bind.annotation.PathVariable
-import java.util.*
 
 @Component
 class PostalServiceClientFallbackFactory : FallbackFactory<PostalServiceClient> {
