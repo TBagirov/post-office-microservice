@@ -25,6 +25,7 @@ class SecurityConfig(
             .authorizeHttpRequests {
 
                 //TODO: убрать строку снизу
+                it.requestMatchers(HttpMethod.GET, "/api/postal/street/street-info").permitAll()
                 it.requestMatchers(HttpMethod.PUT, "/api/postal/**").hasAuthority(Role.ADMIN)
                 it.anyRequest().authenticated()
             }
