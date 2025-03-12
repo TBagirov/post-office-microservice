@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
 import org.bagirov.authservice.dto.UserEventDto
 import org.bagirov.authservice.dto.PostmanUpdatedEventDto
+import org.bagirov.authservice.dto.UserBecomeSubscriberEventDto
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import java.util.*
@@ -11,7 +12,6 @@ import java.util.*
 @Service
 class KafkaProducerService(
     private val kafkaTemplate: KafkaTemplate<String, String>,
-
     private val objectMapper: ObjectMapper
 ) {
 
@@ -33,6 +33,12 @@ class KafkaProducerService(
         val message = objectMapper.writeValueAsString(event)
         kafkaTemplate.send("postman-updated-events", message)
         log.info { "Sent postman updated event to Kafka: $message" }
+    }
+
+    fun sendUserBecameSubscriberEvent(event: UserBecomeSubscriberEventDto) {
+        val message = objectMapper.writeValueAsString(event)
+        kafkaTemplate.send("user-became-subscriber-events", message)
+        log.info { "Sent user became subscriber event to Kafka: $message" }
     }
 
 }

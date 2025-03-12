@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Подписка отменена</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+    .container { width: 100%; max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .header { background: #dc3545; color: white; padding: 15px; text-align: center; border-radius: 8px 8px 0 0; }
+    .logo { max-width: 100px; }
+    .content { padding: 20px; text-align: center; }
+    .button {
+      background: #dc3545;
+      color: white !important;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      display: inline-block;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .button:hover {
+      background: #93222e;
+    }
+
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <img src="cid:logoImage" alt="PostOffice" class="logo">
+    <h1>PostOffice</h1>
+  </div>
+  <div class="content">
+    <h2>Здравствуйте!</h2>
+    <p>Ваша подписка на <b th:text="${publicationName}"></b> была отменена.</p>
+    <p>Причина отмены: <b th:text="${cancellationReason}"></b>.</p>
+    <p>Если у вас есть вопросы, свяжитесь с нашей поддержкой.</p>
+    <a href="https://postoffice.com/support" class="button">Связаться с поддержкой</a>
+  </div>
+</div>
+</body>
+</html>

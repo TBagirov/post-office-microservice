@@ -11,5 +11,5 @@ interface DistrictRepository: JpaRepository<DistrictEntity, UUID> {
 
     fun findByRegionName(regionName: String): Optional<List<DistrictEntity>>
 
-
+    fun findByRegionId(regionId: UUID): List<DistrictEntity>?
 }

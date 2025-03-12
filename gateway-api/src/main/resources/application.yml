@@ -13,7 +13,15 @@ gateway:
     - id: postal-service
       path: /api/postal/**
       uri: lb://postal-service
-
+    - id: subscriber-service
+      path: /api/subscriber/**
+      uri: lb://subscriber-service
+    - id: publication-service
+      path: /api/publication/**
+      uri: lb://publication-service
+    - id: subscription-service
+      path: /api/subscription/**
+      uri: lb://subscription-service
 
 eureka:
   client:

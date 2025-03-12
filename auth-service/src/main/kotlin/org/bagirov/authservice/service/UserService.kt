@@ -3,6 +3,7 @@ package org.bagirov.authservice.service
 import org.bagirov.authservice.dto.PostmanUpdatedEventDto
 import org.bagirov.authservice.dto.request.UserUpdateRequest
 import org.bagirov.authservice.dto.response.UserResponse
+import org.bagirov.authservice.entity.UserEntity
 import org.bagirov.authservice.props.Role
 import org.bagirov.authservice.repository.UserRepository
 import org.bagirov.authservice.utill.convertToResponseDto
@@ -24,9 +25,9 @@ class UserService (
 
     fun getAll():List<UserResponse> = userRepository.findAll().map{ it.convertToResponseDto()}
 
-    fun update(userUpdate: UserUpdateRequest): UserResponse {
-        val user = userRepository.findById(userUpdate.userId)
-            .orElseThrow { NoSuchElementException("User with ID ${userUpdate.userId} not found") }
+    fun update(currentUser: UserEntity, userUpdate: UserUpdateRequest): UserResponse {
+        val user = userRepository.findById(currentUser.id!!)
+            .orElseThrow { NoSuchElementException("User with ID ${currentUser.id} not found") }
 
         // Обновляем время обновления
         user.apply {
