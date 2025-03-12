@@ -24,9 +24,9 @@ class SecurityConfig(
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
 
-                //TODO: убрать строку снизу
+
                 it.requestMatchers(HttpMethod.GET, "/api/postal/street/street-info").permitAll()
-                it.requestMatchers(HttpMethod.PUT, "/api/postal/**").hasAuthority(Role.ADMIN)
+                it.requestMatchers("/api/postal/**").hasAuthority(Role.ADMIN)
                 it.anyRequest().authenticated()
             }
             .addFilterBefore(JwtAuthenticationFilter(jwtService), BasicAuthenticationFilter::class.java)
