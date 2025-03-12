@@ -7,7 +7,7 @@ import mu.KotlinLogging
 import org.bagirov.subscriberservice.config.CustomUserDetails
 import org.bagirov.subscriberservice.dto.request.SubscriberUpdateRequest
 import org.bagirov.subscriberservice.dto.response.SubscriberResponse
-import org.bagirov.subscriberservice.dto.response.client.SubscriberResponseClient
+import org.bagirov.subscriberservice.dto.response.client.SubscriberResponseUserClient
 import org.bagirov.subscriberservice.service.SubscriberService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
@@ -48,21 +48,6 @@ class SubscriberController(
         return ResponseEntity.ok(subscriberService.getAll())
     }
 
-    @Value("\${internal.api-secret}")
-    private lateinit var apiSecret: String
-
-    @GetMapping("/user/{id}")
-    fun getSubscriberByUserId(
-        @RequestHeader(value = "X-Internal-Call", required = false) secret: String?,
-        @PathVariable(name = "id") userId: UUID
-    ): ResponseEntity<SubscriberResponseClient> {
-        if (secret != apiSecret) {
-            log.warn { "Forbidden access to /user/$userId. Invalid secret: $secret" }
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        }
-        log.info { "Request Subscriber by id: $userId" }
-        return ResponseEntity.ok(subscriberService.getByUserId(userId))
-    }
 
     @PutMapping("/update")
     @Operation(
@@ -77,6 +62,37 @@ class SubscriberController(
         return ResponseEntity.ok(subscriberService.update(user, subscriber))
     }
 
+
+
+
+    @Value("\${internal.api-secret}")
+    private lateinit var apiSecret: String
+
+    @GetMapping("/client/user/{id}")
+    fun getSubscriberByUserId(
+        @RequestHeader(value = "X-Internal-Call", required = false) secret: String?,
+        @PathVariable(name = "id") userId: UUID
+    ): ResponseEntity<SubscriberResponseUserClient> {
+        if (secret != apiSecret) {
+            log.warn { "Forbidden access to /user/$userId. Invalid secret: $secret" }
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+        log.info { "Request Subscriber by id: $userId" }
+        return ResponseEntity.ok(subscriberService.getByUserId(userId))
+    }
+
+    @GetMapping("/client/{id}")
+    fun getSubscriberById(
+        @RequestHeader(value = "X-Internal-Call", required = false) secret: String?,
+        @PathVariable(name = "id") subscriberId: UUID
+    ): ResponseEntity<SubscriberResponse> {
+        if (secret != apiSecret) {
+            log.warn { "Forbidden access to /client/$subscriberId. Invalid secret: $secret" }
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+        log.info { "Request Subscriber by id: $subscriberId" }
+        return ResponseEntity.ok((subscriberService.getById(subscriberId)))
+    }
 //
 //    @DeleteMapping("/delete")
 //    @Operation(

@@ -2,7 +2,7 @@ package org.bagirov.subscriberservice.utill
 
 import org.bagirov.subscriberservice.entity.SubscriberEntity
 import org.bagirov.subscriberservice.dto.response.SubscriberResponse
-import org.bagirov.subscriberservice.dto.response.client.SubscriberResponseClient
+import org.bagirov.subscriberservice.dto.response.client.SubscriberResponseUserClient
 
 fun SubscriberEntity.convertToResponseDto() = SubscriberResponse(
     id = this.id!!,
@@ -13,6 +13,6 @@ fun SubscriberEntity.convertToResponseDto() = SubscriberResponse(
     subAddress = this.subAddress,
 )
 
-fun SubscriberEntity.convertToResponseClientDto() = SubscriberResponseClient(
+fun SubscriberEntity.convertToResponseClientDto() = SubscriberResponseUserClient(
     subscriberId = id!!
 )

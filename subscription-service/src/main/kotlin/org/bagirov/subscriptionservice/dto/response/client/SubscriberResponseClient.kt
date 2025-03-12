@@ -1,7 +1,12 @@
 package org.bagirov.subscriptionservice.dto.response.client
 
-import java.util.UUID
+import java.util.*
 
 data class SubscriberResponseClient (
-    val subscriberId: UUID
+    val id: UUID,
+    val userId: UUID,
+    val building: String,
+    val subAddress: String?,
+    val streetId: UUID,
+    val districtId: UUID,
 )

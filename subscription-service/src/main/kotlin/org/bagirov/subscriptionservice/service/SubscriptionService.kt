@@ -3,10 +3,14 @@ package org.bagirov.subscriptionservice.service
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
 import mu.KotlinLogging
+import org.bagirov.subscriptionservice.client.AuthServiceClient
 import org.bagirov.subscriptionservice.client.PublicationServiceClient
-import org.bagirov.subscriptionservice.client.SubscriberServiceClient
+import org.bagirov.subscriptionservice.client.SubscriberServiceUserClient
 import org.bagirov.subscriptionservice.config.CustomUserDetails
+import org.bagirov.subscriptionservice.dto.SubscriptionCancelledEvent
+import org.bagirov.subscriptionservice.dto.SubscriptionConfirmedEvent
 import org.bagirov.subscriptionservice.dto.SubscriptionCreatedEvent
+import org.bagirov.subscriptionservice.dto.SubscriptionExpiredEvent
 import org.bagirov.subscriptionservice.dto.request.SubscriptionRequest
 import org.bagirov.subscriptionservice.dto.response.SubscriptionResponse
 import org.bagirov.subscriptionservice.entity.SubscriptionEntity
@@ -22,8 +26,9 @@ import java.util.*
 @Service
 class SubscriptionService(
     private val subscriptionRepository: SubscriptionRepository,
-    private val subscriberServiceClient: SubscriberServiceClient,
+    private val subscriberServiceUserClient: SubscriberServiceUserClient,
     private val publicationServiceClient: PublicationServiceClient,
+    private val authServiceClient: AuthServiceClient,
     private val kafkaProducerService: KafkaProducerService
 ) {
 
@@ -39,7 +44,7 @@ class SubscriptionService(
 
     @Transactional(readOnly = true)
     fun getSubscriptionsByUser(currentUser: CustomUserDetails): List<SubscriptionResponse> {
-        val subscriber = subscriberServiceClient.getSubscriber(currentUser.getUserId())
+        val subscriber = subscriberServiceUserClient.getSubscriberByUserId(currentUser.getUserId())
 
         val subscriptions = subscriptionRepository.findBySubscriberId(subscriber.subscriberId)
             ?: throw NoSuchElementException("Subscription with Subscriber ID ${subscriber.subscriberId} not found")
@@ -52,7 +57,7 @@ class SubscriptionService(
     @CircuitBreaker(name = "subscriptionService", fallbackMethod = "fallbackCreateSubscription")
     fun save(currentUser: CustomUserDetails, request: SubscriptionRequest): SubscriptionResponse {
 
-        val tempSubscriber = subscriberServiceClient.getSubscriber(currentUser.getUserId())
+        val tempSubscriber = subscriberServiceUserClient.getSubscriberByUserId(currentUser.getUserId())
         val tempPublication = publicationServiceClient.getPublication(request.publicationId)
 
 
@@ -86,6 +91,42 @@ class SubscriptionService(
         subscriptionRepository.save(subscription)
 
         log.info("Обновлен статус подписки ${subscriptionId}: $status")
+
+        val subscriber = subscriberServiceUserClient.getSubscriber(subscription.subscriberId)
+        val publication = publicationServiceClient.getPublication(subscription.publicationId)
+
+        // **Получаем email и username из AuthService**
+        val userDetails = authServiceClient.getUserDetails(subscriber.userId)
+
+        when (status) {
+            SubscriptionStatus.ACTIVE -> {
+                val event = SubscriptionConfirmedEvent(
+                    email = userDetails.email,
+                    username = userDetails.username,
+                    publicationName = publication.title,
+                    startDate = subscription.startDate.toString(),
+                    duration = subscription.duration
+                )
+                kafkaProducerService.sendNotificationEvent(event)
+            }
+            SubscriptionStatus.CANCELLED -> {
+                val event = SubscriptionCancelledEvent(
+                    email = userDetails.email,
+                    publicationName = publication.title,
+                    cancellationReason = "Платеж не прошел"
+                )
+                kafkaProducerService.sendNotificationEvent(event)
+            }
+            SubscriptionStatus.EXPIRED -> {
+                val event = SubscriptionExpiredEvent(
+                    email = userDetails.email,
+                    publicationName = publication.title,
+                    expirationDate = LocalDateTime.now().toString()
+                )
+                kafkaProducerService.sendNotificationEvent(event)
+            }
+            else -> log.info("Нет события для статуса: $status")
+        }
     }
 
     @Scheduled(fixedRate = 300_000) // Запуск каждые 5 минут (300000 мс)
@@ -101,33 +142,6 @@ class SubscriptionService(
         subscriptionRepository.deleteAll(expiredSubscriptions)
     }
 
-//    @Transactional
-//    @CircuitBreaker(name = "publicationService", fallbackMethod = "fallbackUpdateSubscription")
-//    fun update(currentUser: CustomUserDetails, request: SubscriptionUpdateRequest): SubscriptionResponse {
-//
-//        // Найти подписку
-//        val existingSubscription = subscriptionRepository.findById(request.id)
-//            .orElseThrow { NoSuchElementException("Subscription with ID ${request.id} not found") }
-//
-//        val tempPublication = publicationServiceClient.getPublication(request.publicationId)
-//
-//        val durationUpd = Period.ofMonths(request.duration)
-//
-//        existingSubscription.apply {
-//            publicationId = tempPublication.publicationId
-//            duration = durationUpd
-//        }
-//
-//        val subscriptionUpdate: SubscriptionEntity = subscriptionRepository.save(existingSubscription)
-//
-//
-//        return subscriptionUpdate.convertToResponseDto()
-//    }
-//    // fallback метод, если PublicationService недоступен
-//    fun fallbackUpdateSubscription(user: CustomUserDetails, request: SubscriberUpdateRequest, ex: Throwable): SubscriberResponse {
-//        log.error("Circuit Breaker activated for publication-service! Reason: ${ex.message}", ex)
-//        throw IllegalStateException("Circuit Breaker: Postal Service is currently unavailable: ${ex.message}. Please try again later.")
-//    }\
 
     @Transactional
     fun resubscribe(currentUser: CustomUserDetails, request: SubscriptionRequest): SubscriptionResponse {
@@ -145,7 +159,7 @@ class SubscriptionService(
             .orElseThrow { NoSuchElementException("Subscription with ID $id not found") }
 
         // Проверяем, принадлежит ли подписка текущему пользователю
-        val subscriber = subscriberServiceClient.getSubscriber(currentUser.getUserId())
+        val subscriber = subscriberServiceUserClient.getSubscriberByUserId(currentUser.getUserId())
 
         if (existingSubscription.subscriberId != subscriber.subscriberId) {
             throw IllegalArgumentException("You don't have permission to delete this subscription")

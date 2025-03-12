@@ -23,7 +23,7 @@ class SecurityConfig(
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
-                it.requestMatchers(HttpMethod.GET, "/api/subscriber/user/**").permitAll()
+                it.requestMatchers(HttpMethod.GET, "/api/subscriber/client/**").permitAll()
                 it.requestMatchers(HttpMethod.PUT, "/api/subscriber/update").hasAuthority(Role.SUBSCRIBER)
                 it.requestMatchers(HttpMethod.GET, "/api/subscriber/**").hasAnyAuthority(Role.SUBSCRIBER, Role.ADMIN)
                 it.anyRequest().authenticated()
