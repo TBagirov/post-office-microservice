@@ -3,7 +3,6 @@ package org.bagirov.postalservice.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
-//import org.bagirov.postalservice.dto.postalservice.RegistrationRequest
 import org.bagirov.postalservice.dto.response.PostmanResponse
 import org.bagirov.postalservice.entity.PostmanEntity
 import org.bagirov.postalservice.service.PostmanService
