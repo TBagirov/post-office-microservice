@@ -6,7 +6,7 @@ import org.bagirov.subscriberservice.client.PostalServiceClient
 import org.bagirov.subscriberservice.config.CustomUserDetails
 import org.bagirov.subscriberservice.dto.request.SubscriberUpdateRequest
 import org.bagirov.subscriberservice.dto.response.SubscriberResponse
-import org.bagirov.subscriberservice.dto.response.client.SubscriberResponseClient
+import org.bagirov.subscriberservice.dto.response.client.SubscriberResponseUserClient
 import org.bagirov.subscriberservice.repository.SubscriberRepository
 import org.bagirov.subscriberservice.utill.convertToResponseClientDto
 import org.bagirov.subscriberservice.utill.convertToResponseDto
@@ -28,7 +28,7 @@ class SubscriberService(
             .orElseThrow { NoSuchElementException("Subscriber with ID ${id} not found") }
             .convertToResponseDto()
 
-    fun getByUserId(id: UUID): SubscriberResponseClient =
+    fun getByUserId(id: UUID): SubscriberResponseUserClient =
         subscriberRepository.findByUserId(id)?.convertToResponseClientDto()
             ?: throw NoSuchElementException("Subscriber with ID ${id} not found")
 

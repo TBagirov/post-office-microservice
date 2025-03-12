@@ -13,11 +13,16 @@ spring:
 
   kafka:
     bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
       group-id: postal-service-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      missing-topics-fatal: false
 
 eureka:
   client:
@@ -26,6 +31,15 @@ eureka:
   instance:
     hostname: localhost    # Принудительно указываем localhost
     prefer-ip-address: true  # Использовать IP-адрес вместо имени хоста
+
+internal:
+  api-secret: my-super-secret-key
+
+security:
+  jwt:
+    secret: ab8b9c27d8daa77f1a3d96ff43236fca17e75ecd53138da795d1629148f4c5b620daa674f1f005b1907f469e1cce3f8203f2cd38f167015791171f2a55f37ac62f2d4b1aba6b91799d5bf9de2d4471672909077f4384b36f8e3385e69ac59137816351713df1e99cd7bdc0b40f59c801cde20d6ee7cfb35f5e99a11e374afa876c8e6a5e40115f92799d381dba033c30b26c4d03524aa5502015f67d6b9ca8cad8f6c054819123bab1877152bf04ba85046f8783b205e92a82a75aba45be0cd2542b8ee8b88c9db60f36582b4ab80f759d64d15bbfdc63d436db2495e394dd2e28a707249d234e8200be26718de1f4f0fecd2e5581b4891207d5d0ead6799f94
+    access-expiration: 36000000 # 10 hours
+    refresh-expiration: 252000000 # 7 days
 
 server:
   port: 8082

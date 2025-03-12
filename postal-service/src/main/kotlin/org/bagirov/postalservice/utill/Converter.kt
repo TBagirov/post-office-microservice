@@ -39,6 +39,6 @@ fun RegionEntity.convertToResponseDto() = RegionResponse(
 
 fun DistrictEntity.convertToResponseDto() = DistrictResponse(
     id = this.id!!,
-    postmanId = this.postman?.userId,
+    postmanId = this.postman?.id,
     regionName = this.region?.name
 )

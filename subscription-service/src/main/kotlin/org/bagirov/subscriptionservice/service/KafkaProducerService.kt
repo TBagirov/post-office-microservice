@@ -2,6 +2,7 @@ package org.bagirov.subscriptionservice.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
+import org.bagirov.subscriptionservice.dto.NotificationEvent
 import org.bagirov.subscriptionservice.dto.SubscriptionCreatedEvent
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
@@ -19,4 +20,11 @@ class KafkaProducerService(
         kafkaTemplate.send("subscription-created", message)
         log.info { "Sent subscription-created event to Kafka: $message" }
     }
+
+    fun sendNotificationEvent(event: NotificationEvent) {
+        val message = objectMapper.writeValueAsString(event)
+        kafkaTemplate.send("notification-events", message)
+        log.info { "Sent notification event to Kafka: $message" }
+    }
+
 }
