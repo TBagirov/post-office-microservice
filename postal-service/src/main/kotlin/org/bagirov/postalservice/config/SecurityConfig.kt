@@ -23,6 +23,11 @@ class SecurityConfig(
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
+                it.requestMatchers(
+                    "/api/postal/v3/api-docs/**",
+                    "/api/postal/swagger-ui/**",
+                    "/api/postal/swagger-ui.html"
+                ).permitAll()
 
 
                 it.requestMatchers(HttpMethod.GET, "/api/postal/street/street-info").permitAll()

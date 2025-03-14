@@ -38,8 +38,6 @@ dependencies {
     //LOG
     implementation("io.github.microutils:kotlin-logging:3.0.5")
 
-    // SWAGGER
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.3")
 
     // JJWT
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")

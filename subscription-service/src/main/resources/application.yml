@@ -24,6 +24,16 @@ spring:
     listener:
       missing-topics-fatal: false
 
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api/subscription/v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /api/subscription/swagger-ui.html
+  enable-spring-security: false
+  enable-kotlin: true
+
 
 eureka:
   client:

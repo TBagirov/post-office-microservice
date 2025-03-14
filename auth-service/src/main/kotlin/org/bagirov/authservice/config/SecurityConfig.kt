@@ -29,6 +29,11 @@ class SecurityConfig(
             .addFilterBefore(JwtAuthenticationFilter(userDetailsService, jwtService), UsernamePasswordAuthenticationFilter::class.java)
             .authorizeHttpRequests { authorizationManagerRequestMatcherRegistry ->
                 authorizationManagerRequestMatcherRegistry
+                    .requestMatchers(
+                        "/api/auth/v3/api-docs/**",
+                        "/api/auth/swagger-ui/**",
+                        "/api/auth/swagger-ui.html"
+                    ).permitAll()
                     .requestMatchers("api/auth/registration-postman").hasAuthority(Role.ADMIN)
                     .requestMatchers("api/auth/become-subscriber").hasAuthority(Role.GUEST)
                     .requestMatchers("/api/auth/user/details/**").permitAll()

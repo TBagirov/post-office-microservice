@@ -22,6 +22,25 @@ gateway:
     - id: subscription-service
       path: /api/subscription/**
       uri: lb://subscription-service
+        
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs   # Указывает основной путь для API-документации
+  swagger-ui:
+    enabled: true
+    disable-swagger-default-url: true  # Убирает пустую вкладку
+    urls:
+      - name: Auth Service
+        url: /api/auth/v3/api-docs
+      - name: Postal Service
+        url: /api/postal/v3/api-docs
+      - name: Subscriber Service
+        url: /api/subscriber/v3/api-docs
+      - name: Publication Service
+        url: /api/publication/v3/api-docs
+      - name: Subscription Service
+        url: /api/subscription/v3/api-docs
 
 eureka:
   client:
@@ -31,4 +50,5 @@ eureka:
   instance:
     hostname: localhost    # Принудительно указываем localhost
     prefer-ip-address: true  # Использовать IP-адрес вместо имени хоста
+
 
