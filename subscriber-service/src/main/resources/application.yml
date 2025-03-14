@@ -27,6 +27,15 @@ eureka:
     hostname: localhost    # Принудительно указываем localhost
     prefer-ip-address: true  # Использовать IP-адрес вместо имени хоста
 
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /api/subscriber/swagger-ui.html
+  api-docs:
+    enabled: true
+    path: /api/subscriber/v3/api-docs
+
+
 server:
   port: 8083
 

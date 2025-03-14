@@ -28,6 +28,14 @@ eureka:
 server:
   port: 8081
 
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /api/auth/swagger-ui.html
+  api-docs:
+    enabled: true
+    path: /api/auth/v3/api-docs
+
 internal:
   api-secret: my-super-secret-key
 

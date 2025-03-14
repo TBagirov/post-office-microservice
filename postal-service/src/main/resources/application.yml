@@ -32,6 +32,15 @@ eureka:
     hostname: localhost    # Принудительно указываем localhost
     prefer-ip-address: true  # Использовать IP-адрес вместо имени хоста
 
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /api/postal/swagger-ui.html
+  api-docs:
+    enabled: true
+    path: /api/postal/v3/api-docs
+
+
 internal:
   api-secret: my-super-secret-key
 

@@ -8,11 +8,11 @@ import io.swagger.v3.oas.annotations.servers.Server
 
 
 @OpenAPIDefinition(
-    servers = [Server(
-        url = "http://localhost:8080"
-    )],
+    servers = [
+        Server(url = "http://localhost:8765/api/postal", description = "Gateway URL")
+    ],
     info = Info(
-        title = "post-office API",
+        title = "postal-service API",
         description = "Информационная система учета подписок на печатные издания",
         version = "1.0.0",
         contact = Contact(

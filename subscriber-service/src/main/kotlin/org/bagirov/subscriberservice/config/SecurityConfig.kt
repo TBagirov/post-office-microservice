@@ -23,6 +23,11 @@ class SecurityConfig(
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
+                it.requestMatchers(
+                    "/api/subscriber/v3/api-docs/**",
+                    "/api/subscriber/swagger-ui/**",
+                    "/api/subscriber/swagger-ui.html"
+                ).permitAll()
                 it.requestMatchers(HttpMethod.GET, "/api/subscriber/client/**").permitAll()
                 it.requestMatchers(HttpMethod.PUT, "/api/subscriber/update").hasAuthority(Role.SUBSCRIBER)
                 it.requestMatchers(HttpMethod.GET, "/api/subscriber/**").hasAnyAuthority(Role.SUBSCRIBER, Role.ADMIN)
