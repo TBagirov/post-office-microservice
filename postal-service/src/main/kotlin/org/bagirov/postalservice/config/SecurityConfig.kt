@@ -2,8 +2,8 @@ package org.bagirov.postalservice.config
 
 
 import org.bagirov.postalservice.exception.CustomAccessDeniedHandler
-import org.bagirov.postalservice.service.JwtService
 import org.bagirov.postalservice.props.Role
+import org.bagirov.postalservice.service.JwtService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod

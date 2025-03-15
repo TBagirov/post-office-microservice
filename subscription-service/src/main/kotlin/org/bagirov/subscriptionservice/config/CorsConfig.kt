@@ -1,5 +1,4 @@
-package org.bagirov.authservice.config
-
+package org.bagirov.subscriptionservice.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

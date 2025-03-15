@@ -2,6 +2,7 @@ package org.bagirov.subscriberservice.controller
 
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
 import org.bagirov.subscriberservice.config.CustomUserDetails
@@ -41,7 +42,7 @@ class SubscriberController(
         summary = "Получение всех подписчиков",
         description = "Получение данных всех подписчиков"
     )
-    fun getAll(@AuthenticationPrincipal user: CustomUserDetails):
+    fun getAll(@Parameter(hidden = true) @AuthenticationPrincipal user: CustomUserDetails):
             ResponseEntity<List<SubscriberResponse>>
     {
         log.info { "Request all Subscriber ${user.getUserId()}" }
@@ -54,7 +55,7 @@ class SubscriberController(
         summary = "Редактирование подписчика по id",
         description = "Редактирование данных подписчика по id"
     )
-    fun update(@AuthenticationPrincipal user: CustomUserDetails,
+    fun update(@Parameter(hidden = true) @AuthenticationPrincipal user: CustomUserDetails,
                @RequestBody subscriber: SubscriberUpdateRequest):
             ResponseEntity<SubscriberResponse>
     {
@@ -70,7 +71,7 @@ class SubscriberController(
 
     @GetMapping("/client/user/{id}")
     fun getSubscriberByUserId(
-        @RequestHeader(value = "X-Internal-Call", required = false) secret: String?,
+        @Parameter(hidden = true) @RequestHeader(value = "X-Internal-Call", required = false) secret: String?,
         @PathVariable(name = "id") userId: UUID
     ): ResponseEntity<SubscriberResponseUserClient> {
         if (secret != apiSecret) {
@@ -83,7 +84,7 @@ class SubscriberController(
 
     @GetMapping("/client/{id}")
     fun getSubscriberById(
-        @RequestHeader(value = "X-Internal-Call", required = false) secret: String?,
+        @Parameter(hidden = true) @RequestHeader(value = "X-Internal-Call", required = false) secret: String?,
         @PathVariable(name = "id") subscriberId: UUID
     ): ResponseEntity<SubscriberResponse> {
         if (secret != apiSecret) {

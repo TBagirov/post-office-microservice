@@ -109,8 +109,16 @@ class AuthenticationService(
     }
 
     @Transactional
-    @CircuitBreaker(name = "postalService", fallbackMethod = "fallbackUpdateSubscriber")
+    @CircuitBreaker(name = "subscriberService", fallbackMethod = "fallbackUpdateSubscriber")
     fun becomeSubscriber(currentUser: UserEntity, request: BecomeSubscriberRequest) {
+
+        // Проверяем длину полей building и subAddress
+        if (request.building.length > 5) {
+            throw IllegalArgumentException("Значение 'building' не может быть длиннее 5 символов")
+        }
+        if ((request.subAddress?.length ?: 0) > 5) {
+            throw IllegalArgumentException("Значение 'subAddress' не может быть длиннее 5 символов")
+        }
 
         // Ищем пользователя
         val user = userRepository.findById(currentUser.id!!)
@@ -142,7 +150,7 @@ class AuthenticationService(
     // fallback метод, если PostalService недоступен
     fun fallbackUpdateSubscriber(user: UserEntity, request: BecomeSubscriberRequest, ex: Throwable) {
         log.error("Circuit Breaker activated for postal-service! Reason: ${ex.message}", ex)
-        throw IllegalStateException("Circuit Breaker: Postal Service is currently unavailable: ${ex.message}. Please try again later.")
+        throw IllegalStateException("Circuit Breaker: Subscriber Service is currently unavailable: ${ex.message}. Please try again later.")
     }
 
     fun logout(token: String, response: HttpServletResponse): Map<String, String> {

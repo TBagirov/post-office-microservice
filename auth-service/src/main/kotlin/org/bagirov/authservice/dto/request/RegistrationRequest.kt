@@ -20,9 +20,15 @@ data class RegistrationRequest(
     @Schema(description = "Пароль")
     val password: String,
 
-    @Schema(description = "Электронная почта")
+    @Schema(
+        description = "Электронная почта",
+        example = "test@test.com"
+    )
     val email: String,
 
-    @Schema(description = "Номер телефона")
+    @Schema(
+        description = "Номер телефона",
+        example = "+71234567890"
+    )
     val phone: String,
 )

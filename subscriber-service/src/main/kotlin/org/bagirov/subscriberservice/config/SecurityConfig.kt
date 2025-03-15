@@ -1,8 +1,8 @@
 package org.bagirov.subscriberservice.config
 
 
-import org.bagirov.subscriberservice.props.Role
 import org.bagirov.subscriberservice.exception.CustomAccessDeniedHandler
+import org.bagirov.subscriberservice.props.Role
 import org.bagirov.subscriberservice.service.JwtService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

@@ -2,6 +2,7 @@ package org.bagirov.publicationservice.controller
 
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
 import org.bagirov.publicationservice.dto.request.PublicationRequest
@@ -50,7 +51,7 @@ class PublicationController(
 
     @GetMapping("/user/{id}")
     fun getPublicationById(
-        @RequestHeader(value = "X-Internal-Call", required = false) secret: String?,
+        @Parameter(hidden = true) @RequestHeader(value = "X-Internal-Call", required = false) secret: String?,
         @PathVariable(name = "id") userId: UUID
     ): ResponseEntity<PublicationResponseClient> {
         if (secret != apiSecret) {
