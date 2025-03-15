@@ -45,7 +45,7 @@ springdoc:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
+      defaultZone: ${EUREKA_SERVER}
 
   instance:
     prefer-ip-address: true  # Использовать IP-адрес вместо имени хоста

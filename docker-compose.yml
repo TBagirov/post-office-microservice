@@ -37,8 +37,8 @@ services:
       - "9000:9000"  # API MinIO (S3-compatible)
       - "9090:9090"  # Web UI MinIO
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes:
       - minio_data:/data
     networks:
@@ -54,6 +54,8 @@ services:
       - "8761:8761"
     networks:
       - app-network
+    env_file:
+      - .env
     environment:
       - SERVER_PORT=8761
       - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
@@ -86,18 +88,20 @@ services:
     build: ./auth-service
     container_name: auth-service
     restart: always
+    env_file:
+      - .env
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://auth-db:5432/auth_db
-      - SPRING_DATASOURCE_USERNAME=auth_user
-      - SPRING_DATASOURCE_PASSWORD=auth_pass
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://auth-db:5432/${AUTH_DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${AUTH_DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${AUTH_DB_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_SERVER}
     depends_on:
       eureka-server:
         condition: service_healthy
       auth-db:
         condition: service_started
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://eureka-server:8761/eureka/apps/auth-service" ]
+      test: [ "CMD", "curl", "-f", "${EUREKA_SERVER}apps/auth-service" ]
       interval: 5s
       timeout: 3s
       retries: 3
@@ -110,9 +114,9 @@ services:
     container_name: auth-db
     restart: always
     environment:
-      - POSTGRES_USER=auth_user
-      - POSTGRES_PASSWORD=auth_pass
-      - POSTGRES_DB=auth_db
+      - POSTGRES_USER=${AUTH_DB_USER}
+      - POSTGRES_PASSWORD=${AUTH_DB_PASSWORD}
+      - POSTGRES_DB=${AUTH_DB_NAME}
     ports:
       - "5433:5432"
     networks:
@@ -125,18 +129,20 @@ services:
     build: ./subscriber-service
     container_name: subscriber-service
     restart: always
+    env_file:
+      - .env
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://subscriber-db:5432/subscriber_db
-      - SPRING_DATASOURCE_USERNAME=subscriber_user
-      - SPRING_DATASOURCE_PASSWORD=subscriber_pass
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://subscriber-db:5432/${SUBSCRIBER_DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${SUBSCRIBER_DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${SUBSCRIBER_DB_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_SERVER}
     depends_on:
       eureka-server:
         condition: service_healthy
       subscriber-db:
         condition: service_started
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://eureka-server:8761/eureka/apps/subscriber-service" ]
+      test: [ "CMD", "curl", "-f", "${EUREKA_SERVER}apps/subscriber-service" ]
       interval: 5s
       timeout: 3s
       retries: 3
@@ -148,9 +154,9 @@ services:
     container_name: subscriber-db
     restart: always
     environment:
-      - POSTGRES_USER=subscriber_user
-      - POSTGRES_PASSWORD=subscriber_pass
-      - POSTGRES_DB=subscriber_db
+      - POSTGRES_USER=${SUBSCRIBER_DB_USER}
+      - POSTGRES_PASSWORD=${SUBSCRIBER_DB_PASSWORD}
+      - POSTGRES_DB=${SUBSCRIBER_DB_NAME}
     ports:
       - "5434:5432"
     networks:
@@ -164,18 +170,20 @@ services:
     build: ./postal-service
     container_name: postal-service
     restart: always
+    env_file:
+      - .env
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postal-db:5432/postal_db
-      - SPRING_DATASOURCE_USERNAME=postal_user
-      - SPRING_DATASOURCE_PASSWORD=postal_pass
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postal-db:5432/${POSTAL_DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${POSTAL_DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTAL_DB_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_SERVER}
     depends_on:
       eureka-server:
         condition: service_healthy
       postal-db:
         condition: service_started
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://eureka-server:8761/eureka/apps/postal-service" ]
+      test: [ "CMD", "curl", "-f", "${EUREKA_SERVER}apps/postal-service" ]
       interval: 5s
       timeout: 3s
       retries: 3
@@ -187,9 +195,9 @@ services:
     container_name: postal-db
     restart: always
     environment:
-      - POSTGRES_USER=postal_user
-      - POSTGRES_PASSWORD=postal_pass
-      - POSTGRES_DB=postal_db
+      - POSTGRES_USER=${POSTAL_DB_USER}
+      - POSTGRES_PASSWORD=${POSTAL_DB_PASSWORD}
+      - POSTGRES_DB=${POSTAL_DB_NAME}
     ports:
       - "5435:5432"
     networks:
@@ -202,18 +210,20 @@ services:
     build: ./publication-service
     container_name: publication-service
     restart: always
+    env_file:
+      - .env
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://publication-db:5432/publication_db
-      - SPRING_DATASOURCE_USERNAME=publication_user
-      - SPRING_DATASOURCE_PASSWORD=publication_pass
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://publication-db:5432/${PUBLICATION_DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${PUBLICATION_DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${PUBLICATION_DB_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_SERVER}
     depends_on:
       eureka-server:
         condition: service_healthy
       publication-db:
         condition: service_started
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://eureka-server:8761/eureka/apps/publication-service" ]
+      test: [ "CMD", "curl", "-f", "${EUREKA_SERVER}apps/publication-service" ]
       interval: 5s
       timeout: 3s
       retries: 3
@@ -225,9 +235,9 @@ services:
     container_name: publication-db
     restart: always
     environment:
-      - POSTGRES_USER=publication_user
-      - POSTGRES_PASSWORD=publication_pass
-      - POSTGRES_DB=publication_db
+      - POSTGRES_USER=${PUBLICATION_DB_USER}
+      - POSTGRES_PASSWORD=${PUBLICATION_DB_PASSWORD}
+      - POSTGRES_DB=${PUBLICATION_DB_NAME}
     ports:
       - "5436:5432"
     networks:
@@ -240,18 +250,20 @@ services:
     build: ./subscription-service
     container_name: subscription-service
     restart: always
+    env_file:
+      - .env
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://subscription-db:5432/subscription_db
-      - SPRING_DATASOURCE_USERNAME=subscription_user
-      - SPRING_DATASOURCE_PASSWORD=subscription_pass
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://subscription-db:5432/${SUBSCRIPTION_DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${SUBSCRIPTION_DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${SUBSCRIPTION_DB_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_SERVER}
     depends_on:
       eureka-server:
         condition: service_healthy
       subscription-db:
         condition: service_started
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://eureka-server:8761/eureka/apps/subscription-service" ]
+      test: [ "CMD", "curl", "-f", "${EUREKA_SERVER}apps/subscription-service" ]
       interval: 5s
       timeout: 3s
       retries: 3
@@ -263,9 +275,9 @@ services:
     container_name: subscription-db
     restart: always
     environment:
-      - POSTGRES_USER=subscription_user
-      - POSTGRES_PASSWORD=subscription_pass
-      - POSTGRES_DB=subscription_db
+      - POSTGRES_USER=${SUBSCRIPTION_DB_USER}
+      - POSTGRES_PASSWORD=${SUBSCRIPTION_DB_PASSWORD}
+      - POSTGRES_DB=${SUBSCRIPTION_DB_NAME}
     ports:
       - "5437:5432"
     networks:
@@ -278,18 +290,20 @@ services:
     build: ./payment-service
     container_name: payment-service
     restart: always
+    env_file:
+      - .env
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://payment-db:5432/payment_db
-      - SPRING_DATASOURCE_USERNAME=payment_user
-      - SPRING_DATASOURCE_PASSWORD=payment_pass
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://payment-db:5432/${PAYMENT_DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${PAYMENT_DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${PAYMENT_DB_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_SERVER}
     depends_on:
       eureka-server:
         condition: service_healthy
       payment-db:
         condition: service_started
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://eureka-server:8761/eureka/apps/payment-service" ]
+      test: [ "CMD", "curl", "-f", "${EUREKA_SERVER}apps/payment-service" ]
       interval: 5s
       timeout: 3s
       retries: 3
@@ -301,9 +315,9 @@ services:
     container_name: payment-db
     restart: always
     environment:
-      - POSTGRES_USER=payment_user
-      - POSTGRES_PASSWORD=payment_pass
-      - POSTGRES_DB=payment_db
+      - POSTGRES_USER=${PAYMENT_DB_USER}
+      - POSTGRES_PASSWORD=${PAYMENT_DB_PASSWORD}
+      - POSTGRES_DB=${PAYMENT_DB_NAME}
     ports:
       - "5438:5432"
     networks:
@@ -320,14 +334,16 @@ services:
       eureka-server:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://eureka-server:8761/eureka/apps/notification-service" ]
+      test: [ "CMD", "curl", "-f", "${EUREKA_SERVER}apps/notification-service" ]
       interval: 5s
       timeout: 3s
       retries: 3
     networks:
       - app-network
+    env_file:
+      - .env
     environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_SERVER}
 
 
 networks:
