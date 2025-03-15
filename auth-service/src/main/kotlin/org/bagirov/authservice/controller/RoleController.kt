@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@RequestMapping("/api/role")
+@RequestMapping("/api/auth/role")
 class RoleController(
     private val roleService: RoleService
 ) {

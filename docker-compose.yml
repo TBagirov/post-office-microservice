@@ -40,6 +40,9 @@ services:
     command: server /data --console-address ":9090"
 
 
+
+
+
 volumes:
   zookeeper_data:
     driver: local

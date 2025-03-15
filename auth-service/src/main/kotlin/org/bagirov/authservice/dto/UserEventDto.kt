@@ -1,15 +1,17 @@
 package org.bagirov.authservice.dto
 
+import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 import java.util.*
 
-data class UserEventDto (
+@Schema(description = "Событие создания пользователя (AuthService)")
+data class UserEventDto(
+    @Schema(description = "ID пользователя")
     val id: UUID,
-//    val name: String,
-//    val surname: String,
-//    val patronymic: String,
-//    val email: String?,
-//    val phone: String,
+
+    @Schema(description = "Дата создания пользователя")
     val createdAt: LocalDateTime,
+
+    @Schema(description = "Роль пользователя (строка)")
     val role: String
 )

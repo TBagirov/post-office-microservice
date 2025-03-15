@@ -14,4 +14,5 @@ interface SubscriptionRepository: JpaRepository<SubscriptionEntity, UUID> {
 
     fun findByStatusAndStartDateBefore(status: SubscriptionStatus, startDate: LocalDateTime): List<SubscriptionEntity>?
 
+    fun countByPublicationIdAndStatus(publicationId: UUID, status: SubscriptionStatus): Long?
 }
