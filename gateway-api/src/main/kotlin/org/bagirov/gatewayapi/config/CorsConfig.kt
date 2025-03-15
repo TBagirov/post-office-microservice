@@ -11,12 +11,14 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 class CorsConfig {
     @Bean
     fun corsFilter(): CorsWebFilter {
-        val corsConfig = CorsConfiguration()
-        corsConfig.allowedOrigins = listOf("*") // Разрешить все домены (можно указать конкретные)
-        corsConfig.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
-        corsConfig.allowedHeaders = listOf("Authorization", "*")
-        corsConfig.allowedHeaders = listOf("*")
-        corsConfig.allowCredentials = true
+        val corsConfig = CorsConfiguration().apply {
+            allowedOrigins = listOf("*")
+            allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            allowedHeaders = listOf("Authorization", "Content-Type", "X-Internal-Call")
+            exposedHeaders = listOf("Authorization")  // Чтобы клиент мог получать этот заголовок
+            allowCredentials = true
+            maxAge = 3600  // Кэширование CORS-политики на 1 час
+        }
 
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", corsConfig)
