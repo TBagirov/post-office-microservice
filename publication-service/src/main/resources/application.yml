@@ -4,16 +4,16 @@ spring:
 
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/po-publication
-    username: postgres
-    password: PosTer231
+    url: jdbc:postgresql://publication-db:5432/publication_db
+    username: publication_user
+    password: publication_pass
     driver-class-name: org.postgresql.Driver
 
   jpa:
     show-sql: true
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092
     consumer:
       group-id: publication-service-group
       auto-offset-reset: earliest
@@ -23,9 +23,8 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://eureka-server:8761/eureka/
   instance:
-    hostname: localhost    # ????????????? ????????? localhost
     prefer-ip-address: true  # ???????????? IP-????? ?????? ????? ?????
 
 springdoc:
@@ -38,13 +37,13 @@ springdoc:
 
 
 minio:
-  endpoint: http://localhost:9000
+  endpoint: http://minio:9000
   accessKey: minioadmin
   secretKey: minioadmin
   bucket: book-covers
 
 server:
-  port: 8084
+  port: 0
 
 internal:
   api-secret: my-super-secret-key
