@@ -2,6 +2,7 @@ package org.bagirov.postalservice.controller
 
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
 import org.bagirov.postalservice.dto.request.StreetRequest
@@ -65,7 +66,7 @@ class StreetController(
         description = "Возвращает ID улицы и случайный ID района в этом регионе"
     )
     fun getStreetAndDistrict(
-        @RequestHeader(value = "X-Internal-Call", required = false) secret: String?,
+        @Parameter(hidden = true) @RequestHeader(value = "X-Internal-Call", required = false) secret: String?,
         @RequestParam streetName: String
     ): ResponseEntity<StreetDistrictResponse> {
         if (secret != apiSecret) {

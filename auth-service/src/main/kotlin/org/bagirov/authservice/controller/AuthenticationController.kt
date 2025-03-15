@@ -1,6 +1,7 @@
 package org.bagirov.authservice.controller
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
 import org.bagirov.authservice.dto.request.AuthenticationRequest
@@ -55,7 +56,7 @@ class AuthenticationController(
         description = "Преобразует пользователя GUEST в SUBSCRIBER, добавляя данные о подписке"
     )
     fun becomeSubscriber(
-        @AuthenticationPrincipal user: UserEntity,
+        @Parameter(hidden = true) @AuthenticationPrincipal user: UserEntity,
         @RequestBody request: BecomeSubscriberRequest
     ): ResponseEntity<String> {
         authService.becomeSubscriber(user, request)

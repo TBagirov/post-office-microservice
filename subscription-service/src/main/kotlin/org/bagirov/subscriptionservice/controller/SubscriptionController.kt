@@ -2,6 +2,7 @@ package org.bagirov.subscriptionservice.controller
 
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
 import org.bagirov.subscriptionservice.config.CustomUserDetails
@@ -47,7 +48,7 @@ class SubscriptionController(
         summary = "Добавление подписки",
         description = "Добавление данных о подписке"
     )
-    fun save(@AuthenticationPrincipal user: CustomUserDetails,
+    fun save(@Parameter(hidden = true) @AuthenticationPrincipal user: CustomUserDetails,
              @RequestBody subscription: SubscriptionRequest):
             ResponseEntity<SubscriptionResponse>
     {
@@ -68,7 +69,7 @@ class SubscriptionController(
 
     @GetMapping("/my")
     @Operation(summary = "Получение подписок текущего пользователя")
-    fun getUserSubscriptions(@AuthenticationPrincipal user: CustomUserDetails):
+    fun getUserSubscriptions(@Parameter(hidden = true) @AuthenticationPrincipal user: CustomUserDetails):
             ResponseEntity<List<SubscriptionResponse>>
     {
         log.info { "Fetching subscriptions for user: ${user.getUserId()}" }
@@ -82,7 +83,7 @@ class SubscriptionController(
         description = "Удаление подписки по id, " +
                 "удаленная подписка в записях других таблиц изменится на null"
     )
-    fun delete(@AuthenticationPrincipal user: CustomUserDetails, @RequestParam id: UUID):
+    fun delete(@Parameter(hidden = true) @AuthenticationPrincipal user: CustomUserDetails, @RequestParam id: UUID):
             ResponseEntity<SubscriptionResponse>
     {
         log.info { "Request delete Subscription by id: $id" }
