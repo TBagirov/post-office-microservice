@@ -3,16 +3,16 @@ spring:
     name: auth-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/po-auth
-    username: postgres
-    password: PosTer231
+    url: jdbc:postgresql://auth-db:5432/auth_db
+    username: auth_user
+    password: auth_pass
     driver-class-name: org.postgresql.Driver
 
   jpa:
     show-sql: true
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -20,13 +20,12 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://eureka-server:8761/eureka/
   instance:
-    hostname: localhost    # Принудительно указываем localhost
     prefer-ip-address: true  # Использовать IP-адрес вместо имени хоста
 
 server:
-  port: 8081
+  port: 0
 
 springdoc:
   swagger-ui:
