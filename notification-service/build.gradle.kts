@@ -31,6 +31,8 @@ dependencies {
 	implementation("org.springframework.kafka:spring-kafka")
 	implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
 
+	// SWAGGER
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
 
 	//LOG
 	implementation("io.github.microutils:kotlin-logging:3.0.5")

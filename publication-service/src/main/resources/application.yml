@@ -35,8 +35,6 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /api/publication/swagger-ui.html
-  enable-spring-security: false
-  enable-kotlin: true
 
 
 minio:
