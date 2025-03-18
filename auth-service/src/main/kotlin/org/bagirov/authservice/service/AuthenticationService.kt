@@ -91,21 +91,23 @@ class AuthenticationService(
             createdAt = LocalDateTime.now()
         )
 
-        userRepository.save(user)
+        // было
+        //userRepository.save(user)
+        val saveUser = userRepository.save(user)
         log.info { "User ${request.username} registered successfully" }
 
-        val accessToken = jwtService.createAccessToken(user)
-        val refreshToken = jwtService.createRefreshToken(user)
+        val accessToken = jwtService.createAccessToken(saveUser)
+        val refreshToken = jwtService.createRefreshToken(saveUser)
 
         setRefreshTokenInCookie(response, refreshToken)
-        refreshTokenRepository.save(RefreshTokenEntity(user = user, token = refreshToken))
+        refreshTokenRepository.save(RefreshTokenEntity(user = saveUser, token = refreshToken))
         log.info { "Generated refresh token for newly registered user: ${request.username}" }
 
-        kafkaProducerService.sendUserCreatedEvent(user.convertToResponseEventDto())
+        kafkaProducerService.sendUserCreatedEvent(saveUser.convertToResponseEventDto())
 
         log.info { "Sent Kafka event for user registration: ${request.username}" }
 
-        return AuthenticationResponse(accessToken = accessToken, username = user.username, id = user.id!!)
+        return AuthenticationResponse(accessToken = accessToken, username = saveUser.username, id = saveUser.id!!)
     }
 
     @Transactional
