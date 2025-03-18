@@ -1,6 +1,7 @@
 package org.bagirov.publicationservice.service
 
 
+import mu.KotlinLogging
 import org.bagirov.publicationservice.dto.request.PublicationRequest
 import org.bagirov.publicationservice.dto.request.update.PublicationUpdateRequest
 import org.bagirov.publicationservice.dto.response.PublicationResponse
@@ -21,18 +22,24 @@ class PublicationService(
     private val minioService: MinioService
 ) {
 
-    fun getById(id: UUID): PublicationResponse =
-        publicationRepository.findById(id)
+    private val log = KotlinLogging.logger {}
+
+    fun getById(id: UUID): PublicationResponse {
+        log.info { "Fetching Publication by ID: $id" }
+        return publicationRepository.findById(id)
             .orElseThrow { NoSuchElementException("Publication with ID ${id} not found") }
             .convertToResponseDto()
+    }
 
-    fun getAll(): List<PublicationResponse> =
-        publicationRepository.findAll().map { it.convertToResponseDto() }
+    fun getAll(): List<PublicationResponse> {
+        log.info { "Fetching all Publications" }
+        return publicationRepository.findAll().map { it.convertToResponseDto() }
+    }
 
     @Transactional
     fun save(publication: PublicationRequest): PublicationResponse {
+        log.info { "Saving new Publication: ${publication.title}" }
 
-        // Если тип издания существует, используем его, иначе создаем новый.
         val publicationType = publicationTypeRepository.findByName(publication.type)
             ?: publicationTypeRepository.save(PublicationTypeEntity(name = publication.type))
 
@@ -46,30 +53,26 @@ class PublicationService(
             price = publication.price
         )
 
-        // Сохраняем новый publicationNew
         val publicationSave = publicationRepository.save(publicationNew)
 
-        // Добавляем в коллекцию (она уже инициализирована)
         publicationType.publications?.add(publicationSave)
 
+        log.info { "Publication saved successfully with ID: ${publicationSave.id}" }
         return publicationSave.convertToResponseDto()
     }
 
     @Transactional
     fun update(publication: PublicationUpdateRequest): PublicationResponse {
+        log.info { "Updating Publication with ID: ${publication.id}" }
 
-        // Найти существующее издание или выбросить исключение
         val existingPublication = publicationRepository.findById(publication.id)
             .orElseThrow { NoSuchElementException("Publication with ID ${publication.id} not found") }
 
-        // Найти тип публикации только если type не null
         val tempPublicationType = publication.typeName?.let { typeName ->
             publicationTypeRepository.findByName(typeName)
                 ?: throw NoSuchElementException("Publication type '$typeName' not found")
         }
 
-
-        // Обновление существующей публикации
         existingPublication.apply {
             publication.index?.let { index = it }
             publication.title?.let { title = it }
@@ -79,44 +82,48 @@ class PublicationService(
             tempPublicationType?.let { type = it }
         }
 
-        // Сохранить изменения в публикации
         val savedPublication = publicationRepository.save(existingPublication)
 
-        // Обновить связь публикации с типом (если её не было)
         tempPublicationType?.publications?.let {
             if (!it.contains(savedPublication)) {
                 it.add(savedPublication)
             }
         }
+
+        log.info { "Publication updated successfully: ${savedPublication.id}" }
         return savedPublication.convertToResponseDto()
     }
 
     fun uploadCover(publicationId: UUID, file: MultipartFile): String {
+        log.info { "Uploading cover for Publication ID: $publicationId" }
+
         val publication = publicationRepository.findById(publicationId)
             .orElseThrow { NoSuchElementException("Publication not found") }
 
-        // Удаляем старую обложку, если есть
-        publication.coverUrl?.let { minioService.deleteFile(it) }
+        publication.coverUrl?.let {
+            log.info { "Deleting old cover before uploading a new one" }
+            minioService.deleteFile(it)
+        }
 
-        // Загружаем новую обложку
         val coverUrl = minioService.uploadFile(file)
         publication.coverUrl = coverUrl
 
         publicationRepository.save(publication)
 
+        log.info { "Cover uploaded successfully for Publication ID: $publicationId" }
         return coverUrl
     }
 
     @Transactional
     fun delete(id: UUID): PublicationResponse {
+        log.info { "Deleting Publication with ID: $id" }
 
-        // Найти существующее издание
         val existingPublication = publicationRepository.findById(id)
             .orElseThrow { NoSuchElementException("Publication with ID ${id} not found") }
 
-        // Удалить издание
         publicationRepository.delete(existingPublication)
 
+        log.info { "Publication deleted successfully: $id" }
         return existingPublication.convertToResponseDto()
     }
 

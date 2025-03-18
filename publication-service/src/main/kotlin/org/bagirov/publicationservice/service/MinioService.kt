@@ -23,6 +23,7 @@ class MinioService(
 
     @PostConstruct
     fun init() {
+        log.info { "Initializing MinIO bucket settings..." }
         ensureBucketExists()
         setPublicAccess()
     }
@@ -33,6 +34,8 @@ class MinioService(
             if (!bucketExists) {
                 minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build())
                 log.info { "MinIO Bucket '$bucketName' created" }
+            } else {
+                log.info { "MinIO Bucket '$bucketName' already exists" }
             }
         } catch (e: Exception) {
             log.error(e) { "Error checking/creating MinIO bucket: '$bucketName'" }
@@ -69,6 +72,8 @@ class MinioService(
         val fileId = UUID.randomUUID().toString()
         val fileName = "$fileId-$sanitizedFilename"
 
+        log.info { "Uploading file '$fileName' to MinIO bucket '$bucketName'..." }
+
         minioClient.putObject(
             PutObjectArgs.builder()
                 .bucket(bucketName)
@@ -78,38 +83,38 @@ class MinioService(
                 .build()
         )
 
-        log.info { "Файл загружен: $fileName" }
-
-        return "$endpoint/$bucketName/$fileName" // Формируем ПРАВИЛЬНЫЙ URL
+        log.info { "File uploaded successfully: $fileName" }
+        return "$endpoint/$bucketName/$fileName"
     }
-
 
     fun deleteFile(fileUrl: String) {
         val fileName = fileUrl.substringAfterLast("/")
+        log.info { "Deleting file '$fileName' from MinIO bucket '$bucketName'..." }
+
         minioClient.removeObject(
             RemoveObjectArgs.builder()
                 .bucket(bucketName)
                 .`object`(fileName)
                 .build()
         )
-        log.info { "File deleted: $fileName" }
+
+        log.info { "File deleted successfully: $fileName" }
     }
 
     private fun sanitizeFilename(filename: String): String {
         return filename.trim()
-            .replace("\\s+".toRegex(), "_") // Заменяем пробелы на "_"
-            .replace("[^a-zA-Z0-9._-]".toRegex(), "") // Оставляем только буквы, цифры, ".", "_", "-"
-            .replace("__+".toRegex(), "_") // Убираем двойные подчеркивания
+            .replace("\\s+".toRegex(), "_")
+            .replace("[^a-zA-Z0-9._-]".toRegex(), "")
+            .replace("__+".toRegex(), "_")
     }
 
-
     /**
-     * Автоматическая очистка неиспользуемых файлов.
-     * Запускается **каждый день в 03:00 ночи**.
+     * Automatic cleanup of unused files.
+     * Runs **every day at 03:00 AM**.
      */
     @Scheduled(cron = "0 0 3 * * ?")
     fun cleanUnusedFiles() {
-        log.info { "Запуск очистки неиспользуемых файлов..." }
+        log.info { "Starting cleanup of unused files..." }
 
         try {
             val objects = minioClient.listObjects(
@@ -120,7 +125,6 @@ class MinioService(
                 val file = result.get()
                 val fileName = file.objectName()
 
-                // Проверяем, используется ли этот файл в БД
                 val isFileUsed = publicationRepository.existsByCoverUrl(fileName)
                 if (!isFileUsed) {
                     try {
@@ -130,17 +134,17 @@ class MinioService(
                                 .`object`(fileName)
                                 .build()
                         )
-                        log.info { "Удалён неиспользуемый файл: $fileName" }
+                        log.info { "Deleted unused file: $fileName" }
                     } catch (e: Exception) {
-                        log.error(e) { "Ошибка при удалении файла: $fileName" }
+                        log.error(e) { "Error deleting file: $fileName" }
                     }
                 }
             }
         } catch (e: Exception) {
-            log.error(e) { "Ошибка при получении списка файлов из MinIO" }
+            log.error(e) { "Error retrieving file list from MinIO" }
         }
 
-        log.info { "Очистка завершена!" }
+        log.info { "Cleanup process completed!" }
     }
 
 }

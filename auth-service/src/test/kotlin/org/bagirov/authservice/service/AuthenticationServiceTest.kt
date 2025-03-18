@@ -88,7 +88,7 @@ class AuthenticationServiceTest {
             authenticationService.authorization(request, response)
         }
 
-        assertEquals("пользователь не зарегистрирован", exception.message)
+        assertEquals("User is not registered", exception.message)
     }
 
     @Test

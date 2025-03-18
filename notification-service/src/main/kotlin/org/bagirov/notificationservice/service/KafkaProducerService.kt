@@ -29,7 +29,7 @@ class KafkaProducerService(
 
             log.info { "Notification event sent: $messagePayload" }
         } catch (e: Exception) {
-            log.error(e) { "Ошибка отправки уведомления: ${e.message}" }
+            log.error(e) { "Error sending notification: ${e.message}" }
         }
     }
 }

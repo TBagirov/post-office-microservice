@@ -59,7 +59,7 @@ class SubscriberController(
                @RequestBody subscriber: SubscriberUpdateRequest):
             ResponseEntity<SubscriberResponse>
     {
-        log.info { "Request update Subscriber" }
+        log.info { "Request to update Subscriber" }
         return ResponseEntity.ok(subscriberService.update(user, subscriber))
     }
 

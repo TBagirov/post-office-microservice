@@ -5,9 +5,9 @@ import io.jsonwebtoken.JwtException
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import mu.KotlinLogging
 import org.bagirov.authservice.service.JwtService
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
@@ -20,6 +20,8 @@ class JwtAuthenticationFilter(
     private val jwtService: JwtService
 ) : OncePerRequestFilter() {
 
+    private val log = KotlinLogging.logger {}
+
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -29,11 +31,13 @@ class JwtAuthenticationFilter(
             val authHeader = request.getHeader("Authorization")
 
             if (authHeader == null || authHeader.isEmpty() || !authHeader.startsWith("Bearer ")) {
+                log.debug { "No Authorization header found, skipping filter for request: ${request.requestURI}" }
                 filterChain.doFilter(request, response)
                 return
             }
 
             val jwt = authHeader.substring(7)
+            log.info { "Processing JWT authentication for request: ${request.requestURI}" }
 
             val userUsername = jwtService.getUsername(jwt)
 
@@ -41,23 +45,24 @@ class JwtAuthenticationFilter(
                 val userDetails = this.userDetailsService.loadUserByUsername(userUsername)
 
                 if (jwtService.isValid(jwt, userDetails)) {
-//                    val authToken = UsernamePasswordAuthenticationToken(userUsername, jwt, userDetails.authorities)
+                    log.info { "JWT authentication successful for user: $userUsername" }
                     val authToken = UsernamePasswordAuthenticationToken(userDetails, jwt, userDetails.authorities)
                     authToken.details = WebAuthenticationDetailsSource().buildDetails(request)
-//                    println("AUTH: User - $userUsername, Roles - ${userDetails.authorities}")
                     SecurityContextHolder.getContext().authentication = authToken
+                } else {
+                    log.warn { "JWT authentication failed for user: $userUsername" }
                 }
             }
 
             filterChain.doFilter(request, response)
-
         } catch (ex: ExpiredJwtException) {
+            log.warn { "JWT token has expired" }
             handleException(response, "The token has expired", HttpServletResponse.SC_UNAUTHORIZED)
         } catch (ex: JwtException) {
+            log.error { "Invalid JWT token: ${ex.message}" }
             handleException(response, "Invalid JWT token", HttpServletResponse.SC_UNAUTHORIZED)
-        } catch (ex: AuthenticationException) {
-            handleException(response, "Authentication failed", HttpServletResponse.SC_UNAUTHORIZED)
         } catch (ex: Exception) {
+            log.error { "Unexpected error during JWT authentication: ${ex.message}" }
             handleException(response, "Unexpected Error", HttpServletResponse.SC_UNAUTHORIZED)
         }
     }

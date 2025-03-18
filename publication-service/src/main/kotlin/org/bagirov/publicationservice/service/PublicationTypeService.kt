@@ -1,6 +1,7 @@
 package org.bagirov.publicationservice.service
 
 
+import mu.KotlinLogging
 import org.bagirov.publicationservice.dto.request.PublicationTypeRequest
 import org.bagirov.publicationservice.dto.response.PublicationTypeResponse
 import org.bagirov.publicationservice.entity.PublicationTypeEntity
@@ -15,15 +16,23 @@ class PublicationTypeService(
     private val publicationTypeRepository: PublicationTypeRepository
 ) {
 
-    fun getById(id: UUID): PublicationTypeResponse = publicationTypeRepository.findById(id)
-        .orElseThrow { NoSuchElementException("PublicationType with ID ${id} not found") }
-        .convertToResponseDto()
+    private val log = KotlinLogging.logger {}
 
-    fun getAll(): List<PublicationTypeResponse> = publicationTypeRepository.findAll().map { it.convertToResponseDto() }
+    fun getById(id: UUID): PublicationTypeResponse {
+        log.info { "Fetching PublicationType by ID: $id" }
+        return publicationTypeRepository.findById(id)
+            .orElseThrow { NoSuchElementException("PublicationType with ID ${id} not found") }
+            .convertToResponseDto()
+    }
 
+    fun getAll(): List<PublicationTypeResponse> {
+        log.info { "Fetching all PublicationTypes" }
+        return publicationTypeRepository.findAll().map { it.convertToResponseDto() }
+    }
 
     @Transactional
     fun save(publicationType: PublicationTypeRequest): PublicationTypeResponse {
+        log.info { "Saving new PublicationType: ${publicationType.type}" }
 
         val savePublicationType = publicationTypeRepository.save(
             PublicationTypeEntity(
@@ -31,35 +40,37 @@ class PublicationTypeService(
             )
         )
 
+        log.info { "PublicationType saved with ID: ${savePublicationType.id}" }
         return savePublicationType.convertToResponseDto()
     }
 
     @Transactional
     fun update(publicationType: PublicationTypeEntity): PublicationTypeResponse {
+        log.info { "Updating PublicationType with ID: ${publicationType.id}" }
 
-        // Найти существующий тип издания
         val existingPublicationType = publicationTypeRepository.findById(publicationType.id!!)
-            .orElseThrow { NoSuchElementException("Publication Type with ID ${publicationType.id} not found") }
+            .orElseThrow { NoSuchElementException("PublicationType with ID ${publicationType.id} not found") }
 
         existingPublicationType.name = publicationType.name
 
         publicationTypeRepository.save(existingPublicationType)
 
+        log.info { "PublicationType updated successfully: ${existingPublicationType.id}" }
         return existingPublicationType.convertToResponseDto()
     }
 
     @Transactional
     fun delete(id: UUID): PublicationTypeResponse {
+        log.info { "Deleting PublicationType with ID: $id" }
 
-        // Найти существующий тип издания
         val existingPublicationType = publicationTypeRepository.findById(id)
-            .orElseThrow { NoSuchElementException("Publication Type with ID ${id} not found") }
+            .orElseThrow { NoSuchElementException("PublicationType with ID ${id} not found") }
 
         existingPublicationType.publications = null
 
-        // Удалить тип издания
         publicationTypeRepository.delete(existingPublicationType)
 
+        log.info { "PublicationType deleted: $id" }
         return existingPublicationType.convertToResponseDto()
     }
 

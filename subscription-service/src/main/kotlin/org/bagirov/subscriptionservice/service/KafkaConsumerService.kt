@@ -24,7 +24,7 @@ class KafkaConsumerService(
             subscriptionService.updateSubscriptionStatus(event.subscriptionId, event.status)
             log.info("Processed Payment Event: $event")
         } catch (e: Exception) {
-            log.error(e) {"Ошибка обработки Kafka-сообщения: ${e.message}"}
+            log.error(e) {"Error processing Kafka message: ${e.message}"}
         }
     }
 }

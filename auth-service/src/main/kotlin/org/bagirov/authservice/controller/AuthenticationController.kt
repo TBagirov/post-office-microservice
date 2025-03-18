@@ -36,7 +36,7 @@ class AuthenticationController(
     fun registration(@RequestBody request: RegistrationRequest, response: HttpServletResponse):
             ResponseEntity<AuthenticationResponse>
     {
-        logger.info("Request to registration ${request.username}")
+        logger.info {"Request to registration ${request.username}"}
         return ResponseEntity.ok(authService.registration(request, response))
     }
 
@@ -46,7 +46,7 @@ class AuthenticationController(
     fun registrationPostman(@RequestBody request: RegistrationRequest, response: HttpServletResponse):
             ResponseEntity<AuthenticationResponse>
     {
-        logger.info("Request to registration postman ${request.username}")
+        logger.info {"Request to registration postman ${request.username}"}
         return ResponseEntity.ok(authService.registration(request, response, Role.POSTMAN))
     }
 
@@ -68,7 +68,7 @@ class AuthenticationController(
     fun logout(@CookieValue(value = "refreshToken") token: String, response: HttpServletResponse):
             ResponseEntity<Map<String, String>>
     {
-        logger.info("Request to logout")
+        logger.info {"Request to logout"}
         return ResponseEntity.ok(authService.logout(token, response))
     }
 
