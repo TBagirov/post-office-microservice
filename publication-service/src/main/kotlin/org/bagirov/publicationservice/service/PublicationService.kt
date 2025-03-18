@@ -48,7 +48,6 @@ class PublicationService(
             title = publication.title,
             type = publicationType,
             author = publication.author,
-            coverUrl = publication.coverUrl,
             description = publication.description,
             price = publication.price
         )

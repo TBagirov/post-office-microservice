@@ -1,6 +1,7 @@
 package org.bagirov.authservice.service
 
 import mu.KotlinLogging
+import org.bagirov.authservice.dto.request.RoleRequest
 import org.bagirov.authservice.dto.response.RoleResponse
 import org.bagirov.authservice.entity.RoleEntity
 import org.bagirov.authservice.repository.RoleRepository
@@ -31,10 +32,11 @@ class RoleService(
     }
 
     @Transactional
-    fun save(roleName: String): RoleResponse {
+    fun save(roleName: RoleRequest): RoleResponse {
         log.info { "Saving new role: $roleName" }
+
         return roleRepository.save(
-            RoleEntity(name = roleName)
+            RoleEntity(name = roleName.roleName)
         ).convertToResponseEventDto().also {
             log.info { "Role saved successfully: $roleName" }
         }

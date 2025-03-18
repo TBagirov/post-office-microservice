@@ -1,6 +1,7 @@
 package org.bagirov.postalservice.service
 
 import mu.KotlinLogging
+import org.bagirov.postalservice.dto.request.RegionRequest
 import org.bagirov.postalservice.dto.request.StreetRequest
 import org.bagirov.postalservice.dto.request.StreetUpdateRequest
 import org.bagirov.postalservice.dto.response.StreetDistrictResponse
@@ -79,16 +80,25 @@ class StreetService(
         val existingStreet = streetRepository.findById(streetRequest.id)
             .orElseThrow { NoSuchElementException("Street with ID ${streetRequest.id} not found") }
 
-        val newRegion: RegionEntity? = regionRepository.findById(streetRequest.regionId).orElse(null)
+        // Определяем текущий регион, чтобы проверить, был ли он изменен
+        val currentRegion = existingStreet.region
+        val newRegion = streetRequest.regionId?.let {
+            regionRepository.findById(it).orElseThrow { NoSuchElementException("Region with ID $it not found") }
+        }
 
         existingStreet.apply {
-            region = newRegion
-            name = streetRequest.name
+            streetRequest.name?.let { name = it }
+            newRegion?.let { region = it }
         }
 
         val streetUpdate = streetRepository.save(existingStreet)
 
-        newRegion?.streets?.add(streetUpdate)
+        // Если регион изменился, обновляем список улиц в новом регионе
+        if (currentRegion?.id != newRegion?.id) {
+            currentRegion?.streets?.remove(existingStreet) // Удаляем из старого региона
+            newRegion?.streets?.add(streetUpdate) // Добавляем в новый регион
+            newRegion?.let { regionRepository.save(it) } // Сохраняем изменения в новом регионе
+        }
 
         log.info { "Street updated successfully: ${streetUpdate.id}" }
         return streetUpdate.convertToResponseDto()
@@ -114,7 +124,7 @@ class StreetService(
 
         if (regions.isEmpty()) {
             log.warn { "No regions found, creating default region 'Region1'" }
-            return regionService.saveEnt(RegionEntity(name = "Region1"))
+            return regionService.saveEnt(RegionRequest(name = "Region1"))
         }
 
         return regions.firstOrNull { region ->

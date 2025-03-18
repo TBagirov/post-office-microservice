@@ -25,7 +25,8 @@ class SecurityConfig(
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http.csrf { obj: AbstractHttpConfigurer<*, *> -> obj.disable() }
+        http
+            .csrf { obj: AbstractHttpConfigurer<*, *> -> obj.disable() }
             .addFilterBefore(JwtAuthenticationFilter(userDetailsService, jwtService), UsernamePasswordAuthenticationFilter::class.java)
             .authorizeHttpRequests { authorizationManagerRequestMatcherRegistry ->
                 authorizationManagerRequestMatcherRegistry
@@ -34,12 +35,12 @@ class SecurityConfig(
                         "/api/auth/swagger-ui/**",
                         "/api/auth/swagger-ui.html"
                     ).permitAll()
-                    .requestMatchers("api/auth/registration-postman").hasAuthority(Role.ADMIN)
-                    .requestMatchers("api/auth/become-subscriber").hasAuthority(Role.GUEST)
                     .requestMatchers("/api/auth/user/details/**").permitAll()
-                    .requestMatchers("/api/auth/user/update").hasAnyAuthority(Role.SUBSCRIBER, Role.POSTMAN)
+                    .requestMatchers("/api/auth/user/update").hasAnyAuthority(Role.SUBSCRIBER, Role.POSTMAN, Role.GUEST)
                     .requestMatchers("/api/auth/user/**").hasAuthority(Role.ADMIN)
                     .requestMatchers("/api/auth/role/**").hasAuthority(Role.ADMIN)
+                    .requestMatchers("api/auth/registration-postman").hasAuthority(Role.ADMIN)
+                    .requestMatchers("api/auth/become-subscriber").hasAuthority(Role.GUEST)
                     .requestMatchers(
                         "/api/auth/**",
                     )
