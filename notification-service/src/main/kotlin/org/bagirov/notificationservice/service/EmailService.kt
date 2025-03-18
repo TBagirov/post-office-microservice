@@ -24,7 +24,7 @@ class EmailService(
             val context = Context()
             context.setVariables(variables)
 
-            // 🏆 Попытка загрузить HTML шаблон
+            // Попытка загрузить HTML шаблон
             val htmlContent = templateEngine.process(templateName, context)
             if (htmlContent.isBlank()) {
                 log.error("HTML template is empty or not found: $templateName")
@@ -35,7 +35,7 @@ class EmailService(
             helper.setSubject(subject)
             helper.setText(htmlContent, true) // true - это HTML
 
-            // 🏆 Проверка наличия логотипа и добавление вложения
+            // Проверка наличия логотипа и добавление вложения
             val logoPath = "static/logo1.png"
             val logoResource = ClassPathResource(logoPath)
 
