@@ -47,10 +47,12 @@ class DistrictService(
             postman = tempPostman
         )
 
-        districtRepository.save(district)
+        // было
+//        districtRepository.save(district)
+        val districtSave = districtRepository.save(district)
 
-        tempRegion?.districts?.add(district)
-        tempPostman?.districts?.add(district)
+        tempRegion?.districts?.add(districtSave)
+        tempPostman?.districts?.add(districtSave)
 
         // **Получаем email и username из AuthService**
         val userDetails = authServiceClient.getUserDetails(tempPostman!!.userId)
@@ -63,7 +65,7 @@ class DistrictService(
 
         kafkaProducerService.sendNotificationEvent(event)
 
-        return district.convertToResponseDto()
+        return districtSave.convertToResponseDto()
     }
 
     @Transactional

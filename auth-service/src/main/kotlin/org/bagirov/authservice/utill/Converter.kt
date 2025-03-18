@@ -13,12 +13,7 @@ fun RoleEntity.convertToResponseEventDto() = RoleResponse(
 )
 
 fun UserEntity.convertToResponseEventDto() = UserEventDto(
-    id = this.id!!,
-//    name = this.name,
-//    surname = this.surname,
-//    patronymic = this.patronymic,
-//    email = this.email,
-//    phone = this.phone,
+    id = this.id ?: throw IllegalStateException("User ID is null"),
     createdAt = this.createdAt,
     role = this.role.name
 )

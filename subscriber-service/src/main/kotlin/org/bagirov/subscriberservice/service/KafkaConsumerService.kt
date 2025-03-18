@@ -50,7 +50,7 @@ class KafkaConsumerService (
             } ?: log.warn("Почтальон с userId $userId не найден")
 
         } catch (e: Exception) {
-            log.error("Ошибка обработки Kafka-сообщения о удалении пользователя: ${e.message}", e)
+            log.error(e) {"Ошибка обработки Kafka-сообщения о удалении пользователя: ${e.message}"}
         }
     }
 

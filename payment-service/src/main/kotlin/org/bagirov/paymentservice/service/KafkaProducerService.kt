@@ -14,9 +14,19 @@ class KafkaProducerService(
 
     private val log = KotlinLogging.logger {}
 
+//    fun sendPaymentEvent(event: SubscriptionPaymentEvent) {
+//        val message = objectMapper.writeValueAsString(event)
+//        kafkaTemplate.send("payment-events", message)
+//        log.info { "Sent payment event to Kafka: $message" }
+//    }
+
     fun sendPaymentEvent(event: SubscriptionPaymentEvent) {
-        val message = objectMapper.writeValueAsString(event)
-        kafkaTemplate.send("payment-events", message)
-        log.info { "Sent payment event to Kafka: $message" }
+        try {
+            val message = objectMapper.writeValueAsString(event)
+            kafkaTemplate.send("payment-events", message).get() // Дожидаемся завершения
+            log.info { "Sent payment event to Kafka: $message" }
+        } catch (e: Exception) {
+            log.error(e) {"Ошибка при отправке Kafka-сообщения: ${e.message}"}
+        }
     }
 }

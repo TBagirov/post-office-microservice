@@ -31,7 +31,7 @@ class KafkaConsumerService (
                 log.info("Created postman for user ${userEvent.id}")
             }
         } catch (e: Exception) {
-            log.error("Ошибка обработки Kafka-сообщения: ${e.message}", e)
+            log.error(e) {"Ошибка обработки Kafka-сообщения: ${e.message}"}
         }
     }
 
@@ -47,7 +47,7 @@ class KafkaConsumerService (
             } ?: log.warn("Почтальон с userId $userId не найден")
 
         } catch (e: Exception) {
-            log.error("Ошибка обработки Kafka-сообщения о удалении пользователя: ${e.message}", e)
+            log.error(e) {"Ошибка обработки Kafka-сообщения о удалении пользователя: ${e.message}"}
         }
     }
 
@@ -62,7 +62,7 @@ class KafkaConsumerService (
             } ?: log.warn("Postman with userId ${event.userId} not found")
 
         } catch (e: Exception) {
-            log.error("Ошибка обработки Kafka-сообщения о обновлении почтальона: ${e.message}", e)
+            log.error(e) {"Ошибка обработки Kafka-сообщения о обновлении почтальона: ${e.message}"}
         }
     }
 

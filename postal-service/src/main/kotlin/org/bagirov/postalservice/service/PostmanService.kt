@@ -21,40 +21,6 @@ class PostmanService(
 
     fun getAll(): List<PostmanResponse> = postmanRepository.findAll().map { it.convertToResponseDto() }
 
-//    @Transactional
-//    fun save(request: RegistrationRequest): PostmanResponse {
-//        val users = userRepository.findAll()
-//
-//        users.forEach { user ->
-//            if (request.username == user.username) {
-//                throw IllegalArgumentException("Пользователь с таким username уже существует")
-//            }
-//        }
-//
-//        val rolePostman = roleRepository
-//            .findByName(Role.POSTMAN)
-//
-//        val user = UserEntity(
-//            username = request.username,
-//            password = passwordEncoder.encode(request.password),
-//            role = rolePostman!!,
-//            name = request.name,
-//            surname = request.surname,
-//            patronymic = request.patronymic,
-//            email = request.email,
-//            phone = request.phone,
-//            createdAt = LocalDateTime.now()
-//        )
-//
-//        val savedUser = userRepository.save(user)
-//        val postman = PostmanEntity(
-//            user = savedUser
-//        )
-//
-//        val savedPostman = postmanRepository.save(postman)
-//        return savedPostman.convertToResponseDto()
-//    }
-
     @Transactional
     fun update(postman: PostmanEntity): PostmanResponse {
         // Найти существующего почтальона
