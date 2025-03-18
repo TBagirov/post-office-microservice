@@ -18,6 +18,8 @@ class EmailService(
 
     fun sendEmail(to: String, subject: String, templateName: String, variables: Map<String, Any>) {
         try {
+            log.info { "Preparing to send an email to $to with subject: $subject" }
+
             val message: MimeMessage = mailSender.createMimeMessage()
             val helper = MimeMessageHelper(message, true, "UTF-8")
 
@@ -41,6 +43,7 @@ class EmailService(
 
             if (logoResource.exists()) {
                 helper.addInline("logoImage", logoResource)
+                log.info { "Logo attached to email: $logoPath" }
             } else {
                 log.warn { "Logo file not found at $logoPath, email will be sent without it." }
             }
@@ -48,7 +51,7 @@ class EmailService(
             mailSender.send(message)
             log.info { "HTML email sent to $to with subject: $subject" }
         } catch (e: Exception) {
-            log.error(e) { "Ошибка отправки email на $to: ${e.message}" }
+            log.error(e) { "Error sending email to $to: ${e.message}" }
         }
     }
 }

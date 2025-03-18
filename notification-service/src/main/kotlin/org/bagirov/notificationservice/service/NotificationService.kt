@@ -17,6 +17,8 @@ class NotificationService(
     @KafkaListener(topics = ["notification-events"], groupId = "notification-service-group")
     fun processNotification(message: String) {
         try {
+            log.info { "Received notification message: $message" }
+
             val jsonNode = objectMapper.readTree(message)
             val type = jsonNode.get("type").asText()
 
@@ -31,7 +33,7 @@ class NotificationService(
             sendNotificationEmail(event)
 
         } catch (e: Exception) {
-            log.error(e) { "Ошибка обработки уведомления: ${e.message}" }
+            log.error(e) { "Error processing notification: ${e.message}" }
         }
     }
 

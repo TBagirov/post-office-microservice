@@ -26,7 +26,7 @@ class KafkaProducerService(
             kafkaTemplate.send("payment-events", message).get() // Дожидаемся завершения
             log.info { "Sent payment event to Kafka: $message" }
         } catch (e: Exception) {
-            log.error(e) {"Ошибка при отправке Kafka-сообщения: ${e.message}"}
+            log.error(e) {"Error when sending a Kafka message: ${e.message}"}
         }
     }
 }

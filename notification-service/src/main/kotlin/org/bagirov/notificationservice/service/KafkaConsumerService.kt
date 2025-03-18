@@ -31,7 +31,7 @@ class KafkaConsumerService(
             sendNotificationEmail(event)
 
         } catch (e: Exception) {
-            log.error(e) { "Ошибка обработки уведомления: ${e.message}" }
+            log.error(e) { "Notification processing error: ${e.message}" }
         }
     }
 

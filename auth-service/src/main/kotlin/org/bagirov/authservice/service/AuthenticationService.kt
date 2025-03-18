@@ -49,13 +49,13 @@ class AuthenticationService(
         log.info { "Starting authorization process for user: ${request.username}" }
         if (!isValidAuthenticationCredentials(request)) {
             log.warn { "Invalid authentication credentials provided" }
-            throw IllegalArgumentException("Поля логин и/или пароль пустые")
+            throw IllegalArgumentException("Username and/or password fields are empty")
         }
 
         val user = userRepository.findByUsername(request.username)
             .orElseThrow {
                 log.error { "User ${request.username} not found" }
-                NoSuchElementException("пользователь не зарегистрирован")
+                NoSuchElementException("User is not registered")
             }
 
         authenticationManager.authenticate(UsernamePasswordAuthenticationToken(request.username, request.password))

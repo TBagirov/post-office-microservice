@@ -34,16 +34,22 @@ class SubscriptionService(
 
     private val log = KotlinLogging.logger {}
 
-    fun getById(id: UUID): SubscriptionResponse =
-        subscriptionRepository.findById(id)
+    fun getById(id: UUID): SubscriptionResponse {
+        log.info("Fetching subscription with ID: $id")
+        return subscriptionRepository.findById(id)
             .orElseThrow { NoSuchElementException("Subscription with ID ${id} not found") }
             .convertToResponseDto()
+    }
 
-    fun getAll(): List<SubscriptionResponse> =
-        subscriptionRepository.findAll().map { it.convertToResponseDto() }
+    fun getAll(): List<SubscriptionResponse> {
+        log.info("Fetching all subscriptions")
+        return subscriptionRepository.findAll().map { it.convertToResponseDto() }
+    }
+
 
     @Transactional(readOnly = true)
     fun getSubscriptionsByUser(currentUser: CustomUserDetails): List<SubscriptionResponse> {
+        log.info("Fetching subscriptions for user ID: ${currentUser.getUserId()}")
         val subscriber = subscriberServiceUserClient.getSubscriberByUserId(currentUser.getUserId())
 
         val subscriptions = subscriptionRepository.findBySubscriberId(subscriber.subscriberId)
@@ -56,10 +62,9 @@ class SubscriptionService(
     @Transactional
     @CircuitBreaker(name = "subscriptionService", fallbackMethod = "fallbackCreateSubscription")
     fun save(currentUser: CustomUserDetails, request: SubscriptionRequest): SubscriptionResponse {
-
+        log.info("Creating a new subscription for user ID: ${currentUser.getUserId()}")
         val tempSubscriber = subscriberServiceUserClient.getSubscriberByUserId(currentUser.getUserId())
         val tempPublication = publicationServiceClient.getPublication(request.publicationId)
-
 
         val subscriptionNew = SubscriptionEntity(
             subscriberId = tempSubscriber.subscriberId,
@@ -70,7 +75,8 @@ class SubscriptionService(
 
         val subscriptionSave: SubscriptionEntity = subscriptionRepository.save(subscriptionNew)
 
-        // Отправляем событие в Kafka для обработки оплаты
+        log.info("Subscription created with ID: ${subscriptionSave.id}")
+
         val event = SubscriptionCreatedEvent(
             subscriptionId = subscriptionSave.id!!,
             subscriberId = subscriptionSave.subscriberId,
@@ -84,18 +90,19 @@ class SubscriptionService(
 
     @Transactional
     fun updateSubscriptionStatus(subscriptionId: UUID, status: SubscriptionStatus) {
+        log.info("Updating subscription status for ID: $subscriptionId to $status")
         val subscription = subscriptionRepository.findById(subscriptionId)
             .orElseThrow { IllegalArgumentException("Subscription not found: $subscriptionId") }
 
         subscription.status = status
         subscriptionRepository.save(subscription)
 
-        log.info("Обновлен статус подписки ${subscriptionId}: $status")
+        log.info("Subscription status updated: $subscriptionId -> $status")
 
         val subscriber = subscriberServiceUserClient.getSubscriber(subscription.subscriberId)
         val publication = publicationServiceClient.getPublication(subscription.publicationId)
 
-        // **Получаем email и username из AuthService**
+        // Получаем email и username из AuthService
         val userDetails = authServiceClient.getUserDetails(subscriber.userId)
 
         when (status) {
@@ -125,20 +132,21 @@ class SubscriptionService(
                 )
                 kafkaProducerService.sendNotificationEvent(event)
             }
-            else -> log.info("Нет события для статуса: $status")
+            else -> log.info("No Event for status: $status")
         }
     }
 
     @Scheduled(fixedRate = 300_000) // Запуск каждые 5 минут (300000 мс)
     @Transactional
     fun cleanupUnpaidSubscriptions() {
+        log.warn("Starting cleanup of unpaid subscriptions")
         val expirationTime = LocalDateTime.now().minusMinutes(20)
 
         val expiredSubscriptions = subscriptionRepository.findByStatusAndStartDateBefore(
             SubscriptionStatus.PENDING_PAYMENT, expirationTime
         ) ?: return
 
-        log.warn { "Удаление ${expiredSubscriptions.size} неоплаченных подписок..." }
+        log.warn("Deleting ${expiredSubscriptions.size} unpaid subscriptions")
         subscriptionRepository.deleteAll(expiredSubscriptions)
     }
 
@@ -154,7 +162,7 @@ class SubscriptionService(
     @Transactional
     @CircuitBreaker(name = "subscriberService", fallbackMethod = "fallbackDeleteSubscription")
     fun delete(currentUser: CustomUserDetails, id: UUID): SubscriptionResponse {
-
+        log.info("Deleting subscription with ID: $id for user ID: ${currentUser.getUserId()}")
         val existingSubscription = subscriptionRepository.findById(id)
             .orElseThrow { NoSuchElementException("Subscription with ID $id not found") }
 
@@ -172,7 +180,7 @@ class SubscriptionService(
 
         // Удаляем подписку
         subscriptionRepository.delete(existingSubscription)
-
+        log.info("Subscription with ID $id deleted successfully")
         return existingSubscription.convertToResponseDto()
     }
 

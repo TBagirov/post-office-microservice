@@ -15,9 +15,13 @@ class KafkaProducerService(
     private val log = KotlinLogging.logger {}
 
     fun sendNotificationEvent(event: NotificationEvent) {
-        val message = objectMapper.writeValueAsString(event)
-        kafkaTemplate.send("notification-events", message)
-        log.info { "Sent notification event to Kafka: $message" }
+        try {
+            val message = objectMapper.writeValueAsString(event)
+            kafkaTemplate.send("notification-events", message)
+            log.info { "Successfully sent notification event to Kafka: $message" }
+        } catch (e: Exception) {
+            log.error(e) { "Failed to send notification event: ${e.message}" }
+        }
     }
 
 }

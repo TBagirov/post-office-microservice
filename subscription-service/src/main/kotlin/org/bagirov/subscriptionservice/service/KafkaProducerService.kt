@@ -33,7 +33,7 @@ class KafkaProducerService(
             kafkaTemplate.send("subscription-created", message).get() // Дожидаемся завершения
             log.info { "Sent subscription-created event to Kafka: $message" }
         } catch (e: Exception) {
-            log.error(e) {"Ошибка при отправке Kafka-сообщения: ${e.message}"}
+            log.error(e) {"Error when sending a Kafka message: ${e.message}"}
 
         }
     }
@@ -44,7 +44,7 @@ class KafkaProducerService(
             kafkaTemplate.send("notification-events", message).get() // Дожидаемся завершения
             log.info { "Sent notification event to Kafka: $message" }
         } catch (e: Exception) {
-            log.error(e) {"Ошибка при отправке Kafka-сообщения: ${e.message}"}
+            log.error(e) {"Error when sending a Kafka message: ${e.message}"}
         }
     }
 

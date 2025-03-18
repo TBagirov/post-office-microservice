@@ -33,9 +33,10 @@ class SubscriberService(
             ?: throw NoSuchElementException("Subscriber with ID ${id} not found")
 
 
-    fun getAll(): List<SubscriberResponse> =
-        subscriberRepository.findAll().map { it.convertToResponseDto() }
-
+    fun getAll(): List<SubscriberResponse> {
+        log.info { "get all Subscriber" }
+        return subscriberRepository.findAll().map { it.convertToResponseDto() }
+    }
 
 
     @Transactional

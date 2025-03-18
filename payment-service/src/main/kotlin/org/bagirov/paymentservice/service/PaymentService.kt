@@ -25,11 +25,15 @@ class PaymentService(
     @Transactional
     fun processPayment(event: SubscriptionCreatedEvent) {
         try {
+            log.info { "Processing payment for subscription ${event.subscriptionId}" }
+
             // Получаем информацию о публикации
             val publication: PublicationResponseClient = publicationServiceClient.getPublication(event.publicationId)
+            log.info { "Fetched publication details for publication ID: ${event.publicationId}" }
 
             // Вычисляем стоимость подписки
             val totalAmount = publication.price.multiply(BigDecimal(event.duration)) // BigDecimal умножаем правильно
+            log.info { "Calculated total payment amount: $totalAmount" }
 
             // Создаём запись о платеже со статусом PENDING
             val payment = PaymentEntity(
@@ -39,16 +43,18 @@ class PaymentService(
                 status = PaymentStatus.PENDING
             )
 
-            log.info { "Начинаем обработку платежа для подписки ${event.subscriptionId}" }
+            log.info { "Start payment, subscription: ${event.subscriptionId}" }
             paymentRepository.save(payment)
-            log.info { "Платеж ${payment.id} завершен со статусом ${payment.status}" }
+            log.info { "Payment ${payment.id} created with status ${payment.status}" }
 
             // Имитация процесса оплаты (можно заменить на реальную логику)
             val isPaymentSuccessful = processExternalPayment(totalAmount)
+            log.info { "Payment ${payment.id} created with status ${payment.status}" }
 
             // Обновляем статус оплаты
             payment.status = if (isPaymentSuccessful) PaymentStatus.SUCCESS else PaymentStatus.FAILED
             paymentRepository.save(payment)
+            log.info { "Updated payment ${payment.id} status to ${payment.status}" }
 
             // Отправляем событие в SubscriptionService
             val paymentEvent = SubscriptionPaymentEvent(
@@ -58,10 +64,10 @@ class PaymentService(
 
             paymentEventProducer.sendPaymentEvent(paymentEvent)
 
-            log.info { "Оплата для подписки ${event.subscriptionId} ${if (isPaymentSuccessful) "успешно проведена" else "не удалась"}." }
+            log.info { "Payment event sent for subscription ${event.subscriptionId} with status ${paymentEvent.status}" }
 
         } catch (e: Exception) {
-            log.error(e) { "Ошибка обработки платежа для подписки ${event.subscriptionId}: ${e.message}" }
+            log.error(e) { "Error processing payment for subscription ${event.subscriptionId}: ${e.message}" }
 
             // Если произошла ошибка, отправляем событие об отмене подписки
             val failedEvent = SubscriptionPaymentEvent(
@@ -70,13 +76,15 @@ class PaymentService(
             )
 
             paymentEventProducer.sendPaymentEvent(failedEvent)
+            log.warn { "Subscription ${event.subscriptionId} has been cancelled due to payment processing failure" }
         }
     }
+
     /**
      * Имитация внешней системы платежей.
-     * Можно заменить на реальный вызов API платежного провайдера.
      */
     private fun processExternalPayment(amount: BigDecimal): Boolean {
-        return amount < BigDecimal(5000) // Например, платежи выше 5000 рублей отклоняются
+        log.info { "Simulating external payment processing for amount: $amount" }
+        return amount < BigDecimal(5000) // Платежи выше 5000 рублей отклоняются
     }
 }

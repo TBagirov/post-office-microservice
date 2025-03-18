@@ -34,7 +34,7 @@ class KafkaConsumerService (
         )
 
         subscriberRepository.save(subscriber)
-        log.info("Создан подписчик: ${event.userId}")
+        log.info("Subscriber created: ${event.userId}")
     }
 
 
@@ -46,11 +46,11 @@ class KafkaConsumerService (
 
             subscriberRepository.findByUserId(userId)?.let { subscriber ->
                 subscriberRepository.delete(subscriber)
-                log.info("Удален почтальон, связанный с пользователем $userId")
-            } ?: log.warn("Почтальон с userId $userId не найден")
+                log.info("Subscriber deleted for user $userId")
+            } ?: log.warn("Subscriber with userId $userId not found")
 
         } catch (e: Exception) {
-            log.error(e) {"Ошибка обработки Kafka-сообщения о удалении пользователя: ${e.message}"}
+            log.error(e) { "Error processing Kafka message about user deletion: ${e.message}" }
         }
     }
 
