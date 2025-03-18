@@ -10,16 +10,19 @@ import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
+import org.springframework.web.cors.CorsConfigurationSource
 
 @Configuration
 class SecurityConfig(
     private val jwtService: JwtService,
-    private val customAccessDeniedHandler: CustomAccessDeniedHandler
+    private val customAccessDeniedHandler: CustomAccessDeniedHandler,
+    private val corsConfigurationSource: CorsConfigurationSource  // Внедряем CORS из CorsConfig
 ) {
 
     @Bean
     fun securityFilterChain(http: HttpSecurity) =
         http
+            .cors { it.configurationSource(corsConfigurationSource) }
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
@@ -28,9 +31,8 @@ class SecurityConfig(
                     "/api/postal/swagger-ui/**",
                     "/api/postal/swagger-ui.html"
                 ).permitAll()
-
-
                 it.requestMatchers(HttpMethod.GET, "/api/postal/street/street-info").permitAll()
+                it.requestMatchers(HttpMethod.GET, "/api/postal/postman/my/regions").hasAuthority(Role.POSTMAN)
                 it.requestMatchers("/api/postal/**").hasAuthority(Role.ADMIN)
                 it.anyRequest().authenticated()
             }

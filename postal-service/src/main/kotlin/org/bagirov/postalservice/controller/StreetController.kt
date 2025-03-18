@@ -62,8 +62,8 @@ class StreetController(
 
     @GetMapping("/street-info")
     @Operation(
-        summary = "Получить ID улицы и района",
-        description = "Возвращает ID улицы и случайный ID района в этом регионе"
+        summary = "Получить ID улицы и участка",
+        description = "Возвращает ID улицы и ID участка обслуживаемый почтальоном"
     )
     fun getStreetAndDistrict(
         @Parameter(hidden = true) @RequestHeader(value = "X-Internal-Call", required = false) secret: String?,

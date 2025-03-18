@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class KafkaConsumerService(
-    private val emailService: EmailService,
+    private val notificationService: NotificationService,
     private val objectMapper: ObjectMapper
 ) {
     private val log = KotlinLogging.logger {}
@@ -28,53 +28,10 @@ class KafkaConsumerService(
             }
 
             log.info { "Received notification event: $event" }
-            sendNotificationEmail(event)
+            notificationService.sendNotificationEmail(event)
 
         } catch (e: Exception) {
             log.error(e) { "Notification processing error: ${e.message}" }
-        }
-    }
-
-    private fun sendNotificationEmail(event: NotificationEvent) {
-        when (event) {
-            is SubscriptionConfirmedEvent -> emailService.sendEmail(
-                event.email,
-                "Подтверждение подписки",
-                "subscription-confirmed.html",
-                mapOf(
-                    "username" to event.username,
-                    "publicationName" to event.publicationName,
-                    "startDate" to event.startDate,
-                    "duration" to event.duration
-                )
-            )
-            is PostmanAssignedEvent -> emailService.sendEmail(
-                event.email,
-                "Назначен новый район",
-                "postman-assigned.html",
-                mapOf(
-                    "username" to event.username,
-                    "districtName" to event.districtName
-                )
-            )
-            is SubscriptionExpiredEvent -> emailService.sendEmail(
-                event.email,
-                "Подписка истекла",
-                "subscription-expired.html",
-                mapOf(
-                    "publicationName" to event.publicationName,
-                    "expirationDate" to event.expirationDate
-                )
-            )
-            is SubscriptionCancelledEvent -> emailService.sendEmail(
-                event.email,
-                "Подписка отменена",
-                "subscription-cancelled.html",
-                mapOf(
-                    "publicationName" to event.publicationName,
-                    "cancellationReason" to event.cancellationReason
-                )
-            )
         }
     }
 }

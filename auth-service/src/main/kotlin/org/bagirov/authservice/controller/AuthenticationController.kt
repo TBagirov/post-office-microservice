@@ -74,7 +74,7 @@ class AuthenticationController(
 
     @GetMapping("/refresh")
     @Operation(summary = "Обновление токена")
-    fun refresh(@CookieValue(value = "refreshToken") token: String, response: HttpServletResponse):
+    fun refresh(@Parameter(hidden = true) @CookieValue(value = "refreshToken") token: String, response: HttpServletResponse):
             ResponseEntity<AuthenticationResponse>
     {
         logger.info {"Request to refresh"}

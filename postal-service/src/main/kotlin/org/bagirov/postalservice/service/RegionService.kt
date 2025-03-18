@@ -2,6 +2,8 @@ package org.bagirov.postalservice.service
 
 
 import mu.KotlinLogging
+import org.bagirov.postalservice.dto.request.RegionRequest
+import org.bagirov.postalservice.dto.request.RegionUpdateRequest
 import org.bagirov.postalservice.dto.response.RegionResponse
 import org.bagirov.postalservice.entity.RegionEntity
 import org.bagirov.postalservice.repository.RegionRepository
@@ -34,8 +36,12 @@ class RegionService(
     }
 
     @Transactional
-    fun saveEnt(region: RegionEntity): RegionEntity {
-        log.info { "Saving new region: ${region.name}" }
+    fun saveEnt(regionRequest: RegionRequest): RegionEntity {
+        log.info { "Saving new region: ${regionRequest.name}" }
+
+        val region = RegionEntity(
+            name = regionRequest.name,
+        )
 
         val regionSave = regionRepository.save(region)
 
@@ -47,19 +53,15 @@ class RegionService(
     }
 
     @Transactional
-    fun save(region: RegionEntity): RegionResponse {
+    fun save(region: RegionRequest): RegionResponse {
         return saveEnt(region).convertToResponseDto()
     }
 
     @Transactional
-    fun update(region: RegionEntity): RegionResponse {
+    fun update(region: RegionUpdateRequest): RegionResponse {
         log.info { "Updating region with ID: ${region.id}" }
 
-        // Проверяем, что у региона есть ID; если нет – выбрасываем исключение
-        val regionId = region.id ?: run {
-            log.error { "Attempted to update a region without an ID" }
-            throw IllegalArgumentException("Region id must not be null")
-        }
+        val regionId = region.id
 
         // Найти существующий регион
         val existingRegion = regionRepository.findById(regionId)

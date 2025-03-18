@@ -10,8 +10,8 @@ data class StreetUpdateRequest(
     val id: UUID,
 
     @Schema(description = "Новое название улицы")
-    val name: String,
+    val name: String?,
 
     @Schema(description = "ID региона, к которому относится улица")
-    val regionId: UUID
+    val regionId: UUID?
 )

@@ -17,9 +17,6 @@ data class PublicationRequest(
     @Schema(description = "Описание (аннотация)")
     val description: String?,
 
-    @Schema(description = "URL обложки (при наличии)")
-    val coverUrl: String?,
-
     @Schema(description = "Название типа издания")
     val type: String,
 

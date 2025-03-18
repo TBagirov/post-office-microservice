@@ -22,7 +22,7 @@ gateway:
     - id: subscription-service
       path: /api/subscription/**
       uri: lb://subscription-service
-        
+
 springdoc:
   api-docs:
     enabled: true
@@ -41,6 +41,17 @@ springdoc:
         url: /api/publication/v3/api-docs
       - name: Subscription Service
         url: /api/subscription/v3/api-docs
+
+
+cloud:
+  gateway:
+    globalcors:
+      cors-configurations:
+        '[/**]':
+          allowedOrigins: "*"
+          allowedMethods: "*"
+          allowedHeaders: "*"
+          allowCredentials: true
 
 eureka:
   client:
