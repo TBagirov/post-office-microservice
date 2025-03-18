@@ -37,6 +37,7 @@ class SecurityConfig(
                     .requestMatchers("api/auth/registration-postman").hasAuthority(Role.ADMIN)
                     .requestMatchers("api/auth/become-subscriber").hasAuthority(Role.GUEST)
                     .requestMatchers("/api/auth/user/details/**").permitAll()
+                    .requestMatchers("/api/auth/user/update").hasAnyAuthority(Role.SUBSCRIBER, Role.POSTMAN)
                     .requestMatchers("/api/auth/user/**").hasAuthority(Role.ADMIN)
                     .requestMatchers("/api/auth/role/**").hasAuthority(Role.ADMIN)
                     .requestMatchers(
