@@ -1,6 +1,7 @@
 package org.bagirov.authservice.utill
 
 import org.bagirov.authservice.dto.UserEventDto
+import org.bagirov.authservice.dto.UserUpdatedEventDto
 import org.bagirov.authservice.dto.response.RoleResponse
 import org.bagirov.authservice.dto.response.UserResponse
 import org.bagirov.authservice.dto.response.client.AuthUserResponseClient
@@ -32,8 +33,24 @@ fun UserEntity.convertToResponseDto() = UserResponse(
     role = role.name
 )
 
+fun UserEntity.convertToEventDto() = UserUpdatedEventDto(
+    userId = this.id!!,
+    name = this.name,
+    surname = this.surname,
+    patronymic = this.patronymic,
+    email = this.email,
+    phone = this.phone,
+    updatedAt = this.updatedAt,
+    role = role.name
+)
+
+
+
 fun UserResponse.convertToResponseClientDto() = AuthUserResponseClient(
-    userId = id,
+    userId = this.id,
+    name = this.name,
+    surname = this.surname,
+    patronymic = this.patronymic,
     username = this.username,
     email = this.email
 )

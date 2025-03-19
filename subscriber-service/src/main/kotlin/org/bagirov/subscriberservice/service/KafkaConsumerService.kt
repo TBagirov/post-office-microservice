@@ -6,6 +6,7 @@ import mu.KotlinLogging
 import org.bagirov.subscriberservice.dto.UserBecomeSubscriberEventDto
 import org.bagirov.subscriberservice.entity.SubscriberEntity
 import org.bagirov.subscriberservice.repository.SubscriberRepository
+import org.bagirov.subscriberservice.utill.convertToEventDto
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -15,7 +16,8 @@ import java.util.*
 @Service
 class KafkaConsumerService (
     private val subscriberRepository: SubscriberRepository,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val kafkaProducerService: KafkaProducerService
 ){
 
     private val log = KotlinLogging.logger {}
@@ -35,6 +37,9 @@ class KafkaConsumerService (
 
         subscriberRepository.save(subscriber)
         log.info("Subscriber created: ${event.userId}")
+
+        kafkaProducerService.sendPublicationCreatedEvent(subscriber.convertToEventDto())
+        log.info("Sent subscriber created event to Kafka: $message")
     }
 
 
