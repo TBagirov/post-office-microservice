@@ -22,6 +22,9 @@ gateway:
     - id: subscription-service
       path: /api/subscription/**
       uri: lb://subscription-service
+    - id: report-service
+      path: /api/report/**
+      uri: lb://report-service
 
 springdoc:
   api-docs:
@@ -41,6 +44,8 @@ springdoc:
         url: /api/publication/v3/api-docs
       - name: Subscription Service
         url: /api/subscription/v3/api-docs
+      - name: Report Service
+        url: /api/report/v3/api-docs
 
 
 cloud:

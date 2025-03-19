@@ -1,5 +1,6 @@
 package org.bagirov.subscriberservice.utill
 
+import org.bagirov.subscriberservice.dto.SubscriberEventDto
 import org.bagirov.subscriberservice.entity.SubscriberEntity
 import org.bagirov.subscriberservice.dto.response.SubscriberResponse
 import org.bagirov.subscriberservice.dto.response.client.SubscriberResponseUserClient
@@ -15,4 +16,9 @@ fun SubscriberEntity.convertToResponseDto() = SubscriberResponse(
 
 fun SubscriberEntity.convertToResponseClientDto() = SubscriberResponseUserClient(
     subscriberId = id!!
+)
+
+fun SubscriberEntity.convertToEventDto() = SubscriberEventDto(
+    userId = this.userId,
+    subscriberId = this.id!!
 )

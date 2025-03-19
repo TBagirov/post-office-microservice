@@ -8,6 +8,10 @@ data class AuthUserResponseClient(
     @Schema(description = "ID пользователя")
     val userId: UUID,
 
+    val surname: String,
+    val name: String,
+    val patronymic: String,
+
     @Schema(description = "Email пользователя")
     val email: String,
 

@@ -7,6 +7,7 @@ import org.bagirov.authservice.dto.response.UserResponse
 import org.bagirov.authservice.entity.UserEntity
 import org.bagirov.authservice.props.Role
 import org.bagirov.authservice.repository.UserRepository
+import org.bagirov.authservice.utill.convertToEventDto
 import org.bagirov.authservice.utill.convertToResponseDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -56,6 +57,8 @@ class UserService (
 
         val updatedUser = userRepository.save(user)
         log.info { "User updated successfully: ${user.id}" }
+
+        kafkaProducerService.sendUserUpdatedEvent(updatedUser.convertToEventDto())
 
         if (user.role.name == Role.POSTMAN) {
             log.info { "Sending postman updated event for user: ${user.id}" }

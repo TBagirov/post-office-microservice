@@ -32,6 +32,7 @@ class SecurityConfig(
                     "/api/subscription/swagger-ui.html"
                 ).permitAll()
                 it.requestMatchers("/api/subscription/my").hasAuthority(Role.SUBSCRIBER)
+                it.requestMatchers(HttpMethod.DELETE,"/api/subscription").hasAuthority(Role.SUBSCRIBER)
                 it.requestMatchers(HttpMethod.POST, "/api/subscription").hasAuthority(Role.SUBSCRIBER)
                 it.requestMatchers("/api/subscription/**").hasAuthority(Role.ADMIN)
                 it.anyRequest().authenticated()
