@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.servers.Server
         Server(url = "http://localhost:8765", description = "Gateway URL")
     ],
     info = Info(
-        title = "postal-service API",
+        title = "report-service API",
         description = "Информационная система учета подписок на печатные издания",
         version = "1.0.0",
         contact = Contact(
