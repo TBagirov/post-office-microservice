@@ -14,7 +14,7 @@ class KafkaConsumerService(
 
     private val log = KotlinLogging.logger {}
 
-    @KafkaListener(topics = ["subscription-created"], groupId = "payment-service-group")
+    @KafkaListener(topics = ["subscription-created-events"], groupId = "payment-service-group")
     fun handleSubscriptionEvent(message: String) {
         try {
             val event = objectMapper.readValue(message, SubscriptionCreatedEvent::class.java) // Десериализуем JSON в DTO

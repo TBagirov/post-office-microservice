@@ -9,14 +9,15 @@ import org.bagirov.subscriptionservice.client.SubscriberServiceUserClient
 import org.bagirov.subscriptionservice.config.CustomUserDetails
 import org.bagirov.subscriptionservice.dto.SubscriptionCancelledEvent
 import org.bagirov.subscriptionservice.dto.SubscriptionConfirmedEvent
-import org.bagirov.subscriptionservice.dto.SubscriptionCreatedEvent
 import org.bagirov.subscriptionservice.dto.SubscriptionExpiredEvent
 import org.bagirov.subscriptionservice.dto.request.SubscriptionRequest
 import org.bagirov.subscriptionservice.dto.response.SubscriptionResponse
 import org.bagirov.subscriptionservice.entity.SubscriptionEntity
 import org.bagirov.subscriptionservice.props.SubscriptionStatus
 import org.bagirov.subscriptionservice.repository.SubscriptionRepository
+import org.bagirov.subscriptionservice.utill.convertToEventDto
 import org.bagirov.subscriptionservice.utill.convertToResponseDto
+import org.bagirov.subscriptionservice.utill.convertToUpdatedEventDto
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -77,13 +78,8 @@ class SubscriptionService(
 
         log.info("Subscription created with ID: ${subscriptionSave.id}")
 
-        val event = SubscriptionCreatedEvent(
-            subscriptionId = subscriptionSave.id!!,
-            subscriberId = subscriptionSave.subscriberId,
-            publicationId = subscriptionSave.publicationId,
-            duration = subscriptionSave.duration
-        )
-        kafkaProducerService.sendSubscriptionCreatedEvent(event)
+        log.info { "Sent Kafka event for subscription created by id: ${subscriptionSave.id}" }
+        kafkaProducerService.sendSubscriptionCreatedEvent(subscriptionSave.convertToEventDto())
 
         return subscriptionSave.convertToResponseDto()
     }
@@ -95,9 +91,11 @@ class SubscriptionService(
             .orElseThrow { IllegalArgumentException("Subscription not found: $subscriptionId") }
 
         subscription.status = status
-        subscriptionRepository.save(subscription)
-
+        val newSubscription = subscriptionRepository.save(subscription)
         log.info("Subscription status updated: $subscriptionId -> $status")
+
+        log.info { "Sent Kafka event for subscription updated by id: ${newSubscription.id}" }
+        kafkaProducerService.sendSubscriptionUpdate(newSubscription.convertToUpdatedEventDto())
 
         val subscriber = subscriberServiceUserClient.getSubscriber(subscription.subscriberId)
         val publication = publicationServiceClient.getPublication(subscription.publicationId)
@@ -181,6 +179,10 @@ class SubscriptionService(
         // Удаляем подписку
         subscriptionRepository.delete(existingSubscription)
         log.info("Subscription with ID $id deleted successfully")
+
+        kafkaProducerService.sendSubscriptionDeletedEvent(id)
+        log.info { "Sent Kafka event for subscription deleted by id: $id" }
+
         return existingSubscription.convertToResponseDto()
     }
 

@@ -25,7 +25,7 @@ data class SubscriptionEntity(
     val duration: Int,
 
     @Column(name = "status", nullable = false)
-    @Enumerated(EnumType.STRING) // Теперь enum будет храниться в виде строки
+    @Enumerated(EnumType.STRING) // enum будет храниться в виде строки
     var status: SubscriptionStatus = SubscriptionStatus.PENDING_PAYMENT,
 
     @Column(name="created_at", nullable = false)

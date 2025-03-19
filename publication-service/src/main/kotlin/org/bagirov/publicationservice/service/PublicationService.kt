@@ -10,6 +10,7 @@ import org.bagirov.publicationservice.entity.PublicationTypeEntity
 import org.bagirov.publicationservice.repository.PublicationRepository
 import org.bagirov.publicationservice.repository.PublicationTypeRepository
 import org.bagirov.publicationservice.utill.convertToResponseDto
+import org.bagirov.publicationservice.utill.convertToEventDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
@@ -19,7 +20,8 @@ import java.util.*
 class PublicationService(
     private val publicationRepository: PublicationRepository,
     private val publicationTypeRepository: PublicationTypeRepository,
-    private val minioService: MinioService
+    private val minioService: MinioService,
+    private val kafkaProducerService: KafkaProducerService
 ) {
 
     private val log = KotlinLogging.logger {}
@@ -37,47 +39,50 @@ class PublicationService(
     }
 
     @Transactional
-    fun save(publication: PublicationRequest): PublicationResponse {
-        log.info { "Saving new Publication: ${publication.title}" }
+    fun save(request: PublicationRequest): PublicationResponse {
+        log.info { "Saving new Publication: ${request.title}" }
 
-        val publicationType = publicationTypeRepository.findByName(publication.type)
-            ?: publicationTypeRepository.save(PublicationTypeEntity(name = publication.type))
+        val publicationType = publicationTypeRepository.findByName(request.type)
+            ?: publicationTypeRepository.save(PublicationTypeEntity(name = request.type))
 
         val publicationNew = PublicationEntity(
-            index = publication.index,
-            title = publication.title,
+            index = request.index,
+            title = request.title,
             type = publicationType,
-            author = publication.author,
-            description = publication.description,
-            price = publication.price
+            author = request.author,
+            description = request.description,
+            price = request.price
         )
 
         val publicationSave = publicationRepository.save(publicationNew)
-
         publicationType.publications?.add(publicationSave)
 
         log.info { "Publication saved successfully with ID: ${publicationSave.id}" }
+
+        kafkaProducerService.sendPublicationCreatedEvent(publicationSave.convertToEventDto())
+        log.info { "Sent Kafka event for publication created: ${request.title} with index ${request.index}" }
+
         return publicationSave.convertToResponseDto()
     }
 
     @Transactional
-    fun update(publication: PublicationUpdateRequest): PublicationResponse {
-        log.info { "Updating Publication with ID: ${publication.id}" }
+    fun update(request: PublicationUpdateRequest): PublicationResponse {
+        log.info { "Updating Publication with ID: ${request.id}" }
 
-        val existingPublication = publicationRepository.findById(publication.id)
-            .orElseThrow { NoSuchElementException("Publication with ID ${publication.id} not found") }
+        val existingPublication = publicationRepository.findById(request.id)
+            .orElseThrow { NoSuchElementException("Publication with ID ${request.id} not found") }
 
-        val tempPublicationType = publication.typeName?.let { typeName ->
+        val tempPublicationType = request.typeName?.let { typeName ->
             publicationTypeRepository.findByName(typeName)
                 ?: throw NoSuchElementException("Publication type '$typeName' not found")
         }
 
         existingPublication.apply {
-            publication.index?.let { index = it }
-            publication.title?.let { title = it }
-            publication.description?.let { description = it }
-            publication.author?.let { author = it }
-            publication.price?.let { price = it }
+            request.index?.let { index = it }
+            request.title?.let { title = it }
+            request.description?.let { description = it }
+            request.author?.let { author = it }
+            request.price?.let { price = it }
             tempPublicationType?.let { type = it }
         }
 
@@ -88,8 +93,11 @@ class PublicationService(
                 it.add(savedPublication)
             }
         }
-
         log.info { "Publication updated successfully: ${savedPublication.id}" }
+
+        log.info { "Sent Kafka event for publication updated by id: ${request.id}" }
+        kafkaProducerService.sendPublicationUpdatedEvent(request.convertToEventDto())
+
         return savedPublication.convertToResponseDto()
     }
 
@@ -118,11 +126,15 @@ class PublicationService(
         log.info { "Deleting Publication with ID: $id" }
 
         val existingPublication = publicationRepository.findById(id)
-            .orElseThrow { NoSuchElementException("Publication with ID ${id} not found") }
+            .orElseThrow {
+                log.error { "Publication with ID $id not found" }
+                NoSuchElementException("Publication with ID ${id} not found")
+            }
 
         publicationRepository.delete(existingPublication)
-
         log.info { "Publication deleted successfully: $id" }
+
+        kafkaProducerService.sendPublicationDeletedEvent(id)
         return existingPublication.convertToResponseDto()
     }
 
