@@ -59,7 +59,7 @@ class ReportController (
         description = "Получение отчета c данными о подписках подписчика по id"
     )
     fun getReportSubscriptionsBySubscriberId(@RequestParam id: UUID): ResponseEntity<ByteArray> {
-        log.info { "Request get Report on Subscription  by id: $id" }
+        log.info { "Request get Report Subscription by Subscriber id: $id" }
 
         val excelFile: ByteArray = reportService.subscriptionByIdSubscriberReport(id)
             ?: throw Exception("Failed to create Excel file ReportSubscriptionsBySubscriberId")

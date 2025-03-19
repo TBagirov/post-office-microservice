@@ -9,8 +9,6 @@ import org.bagirov.publicationservice.dto.response.PublicationTypeResponse
 import org.bagirov.publicationservice.entity.PublicationEntity
 import org.bagirov.publicationservice.entity.PublicationTypeEntity
 
-
-
 fun PublicationEntity.convertToResponseDto() = PublicationResponse(
     id = this.id!!,
     index = this.index,
