@@ -27,13 +27,11 @@ class SecurityConfig(
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
                 it.requestMatchers(
-                    "/api/postal/v3/api-docs/**",
-                    "/api/postal/swagger-ui/**",
-                    "/api/postal/swagger-ui.html"
+                    "/api/report/v3/api-docs/**",
+                    "/api/report/swagger-ui/**",
+                    "/api/report/swagger-ui.html"
                 ).permitAll()
-                it.requestMatchers(HttpMethod.GET, "/api/postal/street/street-info").permitAll()
-                it.requestMatchers(HttpMethod.GET, "/api/postal/postman/my/regions").hasAuthority(Role.POSTMAN)
-                it.requestMatchers("/api/postal/**").hasAuthority(Role.ADMIN)
+                it.requestMatchers("/api/report").hasAuthority(Role.ADMIN)
                 it.anyRequest().authenticated()
             }
             .addFilterBefore(JwtAuthenticationFilter(jwtService), BasicAuthenticationFilter::class.java)

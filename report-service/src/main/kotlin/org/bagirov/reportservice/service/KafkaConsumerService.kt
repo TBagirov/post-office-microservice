@@ -161,7 +161,6 @@ class KafkaConsumerService (
         try {
             val event = objectMapper.readValue(message, SubscriptionCreatedEvent::class.java) // Десериализуем JSON в DTO
 
-
             val publication = publicationRepository.findByPublicationId(event.publicationId)
                 ?: throw NoSuchElementException("Publication with ID ${event.publicationId} not found")
 
@@ -178,8 +177,11 @@ class KafkaConsumerService (
             )
 
             subscriptionRepository.save(subscription)
-
             log.info {"Processed subscription-created event: $event"}
+
+            publication.countSubscriber++
+            publicationRepository.save(publication)
+            log.info {"add count subscriber in publication with index: ${publication.index}"}
         } catch (e: Exception) {
             log.error(e) { "Error processing subscription-created event: ${e.message}" }
         }
