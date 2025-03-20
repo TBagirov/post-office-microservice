@@ -14,12 +14,6 @@ class KafkaProducerService(
 
     private val log = KotlinLogging.logger {}
 
-//    fun sendPaymentEvent(event: SubscriptionPaymentEvent) {
-//        val message = objectMapper.writeValueAsString(event)
-//        kafkaTemplate.send("payment-events", message)
-//        log.info { "Sent payment event to Kafka: $message" }
-//    }
-
     fun sendPaymentEvent(event: SubscriptionPaymentEvent) {
         try {
             val message = objectMapper.writeValueAsString(event)

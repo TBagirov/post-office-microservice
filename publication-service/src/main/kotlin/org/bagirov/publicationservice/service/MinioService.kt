@@ -109,8 +109,7 @@ class MinioService(
     }
 
     /**
-     * Automatic cleanup of unused files.
-     * Runs **every day at 03:00 AM**.
+     * Задача будет выполняться каждый день в 03:00 ночи.
      */
     @Scheduled(cron = "0 0 3 * * ?")
     fun cleanUnusedFiles() {

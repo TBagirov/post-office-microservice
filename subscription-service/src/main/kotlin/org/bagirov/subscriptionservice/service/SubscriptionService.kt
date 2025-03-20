@@ -148,14 +148,12 @@ class SubscriptionService(
         subscriptionRepository.deleteAll(expiredSubscriptions)
     }
 
-
     @Transactional
     fun resubscribe(currentUser: CustomUserDetails, request: SubscriptionRequest): SubscriptionResponse {
         val newSubscription = save(currentUser, request)
         delete(currentUser, request.publicationId)
         return newSubscription
     }
-
 
     @Transactional
     @CircuitBreaker(name = "subscriberService", fallbackMethod = "fallbackDeleteSubscription")
