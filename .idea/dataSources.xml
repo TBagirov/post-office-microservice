@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="po-auth@localhost" uuid="ea1e9441-b65e-4510-bc9d-f43dd3cf85b3">
+    <data-source source="LOCAL" name="auth_db@localhost" uuid="5c0c0816-ce35-41ac-8326-fb6a1dd32ca2">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/po-auth</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5433/auth_db</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
@@ -13,11 +13,12 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="po-postal@localhost" uuid="957b745c-88a0-4814-8574-85e288e64f4b">
+    <data-source source="LOCAL" name="subscriber_db@localhost" uuid="bf1f84ff-d37f-4ae1-be1d-ecbe7075f639">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
+      <remarks>subscriber_pass</remarks>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/po-postal</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5434/subscriber_db</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
@@ -25,11 +26,11 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="po-subscriber@localhost" uuid="a6b99c69-cab0-4310-9b78-29fe4db8ecc1">
+    <data-source source="LOCAL" name="postal_db@localhost" uuid="d9843654-b27a-410f-9c1e-6e4d39b18491">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/po-subscriber</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5435/postal_db</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
@@ -37,11 +38,11 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="po-publication@localhost" uuid="b343cc5e-4d12-4061-8eb5-83fb3c2f7dc2">
+    <data-source source="LOCAL" name="publication_db@localhost" uuid="a4e59999-b8f5-4d05-831d-0657db6a3362">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/po-publication</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5436/publication_db</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
@@ -49,11 +50,11 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="po-subscription@localhost" uuid="9e1f258a-887e-4c15-a284-efb085f89e78">
+    <data-source source="LOCAL" name="subscription_db@localhost" uuid="610eda46-4afb-40a7-b312-ad689c9a75e2">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/po-subscription</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5437/subscription_db</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
@@ -61,11 +62,11 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="po-payment@localhost" uuid="be942bf6-87e3-41e8-839c-eef6912f3f72">
+    <data-source source="LOCAL" name="payment_db@localhost" uuid="ee5dfda9-a364-4eeb-a5dd-4fede9348d6c">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/po-payment</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5438/payment_db</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
@@ -73,11 +74,11 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="report_db@report-db" uuid="4d1d03c8-fd63-42cd-ba43-655d77ff386f">
+    <data-source source="LOCAL" name="report_db@localhost" uuid="7e449b84-416e-4e40-bca1-2699152b52cc">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://report-db:5439/report_db</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5439/report_db</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
