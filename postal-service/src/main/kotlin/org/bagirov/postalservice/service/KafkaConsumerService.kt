@@ -21,17 +21,17 @@ class KafkaConsumerService (
     private val log = KotlinLogging.logger {}
 
     @KafkaListener(topics = ["user-created-events"], groupId = "postal-service-group")
-    fun consumeUserCreatedEvent(message : String){
+    fun consumeUserCreatedEvent(message: String) {
         try {
             val userEvent = objectMapper.readValue(message, UserEventDto::class.java)
 
             if (userEvent.role == Role.POSTMAN) {
                 val postman = PostmanEntity(userId = userEvent.id)
                 postmanRepository.save(postman)
-                log.info("Created postman for user ${userEvent.id}")
+                log.info { "Postman created for user ID: ${userEvent.id}" }
             }
         } catch (e: Exception) {
-            log.error("Ошибка обработки Kafka-сообщения: ${e.message}", e)
+            log.error(e) { "Error processing Kafka message: ${e.message}" }
         }
     }
 
@@ -43,11 +43,11 @@ class KafkaConsumerService (
 
             postmanRepository.findByUserId(userId)?.let { postman ->
                 postmanRepository.delete(postman)
-                log.info("Удален почтальон, связанный с пользователем $userId")
-            } ?: log.warn("Почтальон с userId $userId не найден")
+                log.info { "Postman deleted for user ID: $userId" }
+            } ?: log.warn { "Postman with userId $userId not found" }
 
         } catch (e: Exception) {
-            log.error("Ошибка обработки Kafka-сообщения о удалении пользователя: ${e.message}", e)
+            log.error(e) { "Error processing Kafka message for user deletion: ${e.message}" }
         }
     }
 
@@ -58,11 +58,11 @@ class KafkaConsumerService (
 
             postmanRepository.findByUserId(event.userId)?.let { postman ->
                 postmanRepository.save(postman)
-                log.info("Updated postman with userId ${event.userId}")
-            } ?: log.warn("Postman with userId ${event.userId} not found")
+                log.info { "Postman updated for user ID: ${event.userId}" }
+            } ?: log.warn { "Postman with userId ${event.userId} not found" }
 
         } catch (e: Exception) {
-            log.error("Ошибка обработки Kafka-сообщения о обновлении почтальона: ${e.message}", e)
+            log.error(e) { "Error processing Kafka message for postman update: ${e.message}" }
         }
     }
 

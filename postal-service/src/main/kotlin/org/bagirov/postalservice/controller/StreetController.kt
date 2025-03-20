@@ -2,6 +2,7 @@ package org.bagirov.postalservice.controller
 
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
 import org.bagirov.postalservice.dto.request.StreetRequest
@@ -9,6 +10,8 @@ import org.bagirov.postalservice.dto.request.StreetUpdateRequest
 import org.bagirov.postalservice.dto.response.StreetDistrictResponse
 import org.bagirov.postalservice.dto.response.StreetResponse
 import org.bagirov.postalservice.service.StreetService
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -42,13 +45,6 @@ class StreetController(
         return ResponseEntity.ok(streetService.getAll())
     }
 
-    @GetMapping("/street-info")
-    @Operation(summary = "Получить ID улицы и района", description = "Возвращает ID улицы и случайный ID района в этом регионе")
-    fun getStreetAndDistrict(@RequestParam streetName: String): ResponseEntity<StreetDistrictResponse> {
-        log.info { "Received request for street info: $streetName" }
-        return ResponseEntity.ok(streetService.getStreetAndDistrict(streetName))
-    }
-
     @PostMapping()
     @Operation(
         summary = "Добавление улицы",
@@ -59,6 +55,28 @@ class StreetController(
         log.info {"Request create Street"}
         return ResponseEntity.ok(streetService.save(streetRequest))
     }
+
+
+    @Value("\${internal.api-secret}")
+    private lateinit var apiSecret: String
+
+    @GetMapping("/street-info")
+    @Operation(
+        summary = "Получить ID улицы и участка",
+        description = "Возвращает ID улицы и ID участка обслуживаемый почтальоном"
+    )
+    fun getStreetAndDistrict(
+        @Parameter(hidden = true) @RequestHeader(value = "X-Internal-Call", required = false) secret: String?,
+        @RequestParam streetName: String
+    ): ResponseEntity<StreetDistrictResponse> {
+        if (secret != apiSecret) {
+            log.warn { "Forbidden access to /street-info with $streetName. Invalid secret: $secret" }
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+        log.info { "Received request for street info: $streetName" }
+        return ResponseEntity.ok(streetService.getStreetAndDistrict(streetName))
+    }
+
 
     @PutMapping()
     @Operation(
@@ -80,4 +98,5 @@ class StreetController(
         log.info {"Delete Street by id: $id"}
         return ResponseEntity.ok(streetService.delete(id))
     }
+
 }

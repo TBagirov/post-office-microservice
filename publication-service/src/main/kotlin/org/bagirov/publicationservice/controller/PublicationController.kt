@@ -2,12 +2,16 @@ package org.bagirov.publicationservice.controller
 
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
 import org.bagirov.publicationservice.dto.request.PublicationRequest
 import org.bagirov.publicationservice.dto.request.update.PublicationUpdateRequest
 import org.bagirov.publicationservice.dto.response.PublicationResponse
+import org.bagirov.publicationservice.dto.response.client.PublicationResponseClient
 import org.bagirov.publicationservice.service.PublicationService
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
@@ -40,6 +44,31 @@ class PublicationController(
     fun getAll():ResponseEntity<List<PublicationResponse>> {
         log.info {"Request get all Publication"}
         return ResponseEntity.ok(publicationService.getAll())
+    }
+
+    @Value("\${internal.api-secret}")
+    private lateinit var apiSecret: String
+
+    @GetMapping("/user/{id}")
+    fun getPublicationById(
+        @Parameter(hidden = true) @RequestHeader(value = "X-Internal-Call", required = false) secret: String?,
+        @PathVariable(name = "id") userId: UUID
+    ): ResponseEntity<PublicationResponseClient> {
+        if (secret != apiSecret) {
+            log.warn { "Forbidden access to /user/$userId. Invalid secret: $secret" }
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+        log.info { "Request Subscriber by id: $userId" }
+
+        val pub = publicationService.getById(userId)
+
+        return ResponseEntity.ok(
+            PublicationResponseClient(
+                pub.id,
+                pub.price,
+                pub.title
+            )
+        )
     }
 
     @PostMapping("/upload-cover/{id}")

@@ -25,27 +25,26 @@ class SecurityConfig(
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http.csrf { obj: AbstractHttpConfigurer<*, *> -> obj.disable() }
+        http
+            .csrf { obj: AbstractHttpConfigurer<*, *> -> obj.disable() }
             .addFilterBefore(JwtAuthenticationFilter(userDetailsService, jwtService), UsernamePasswordAuthenticationFilter::class.java)
             .authorizeHttpRequests { authorizationManagerRequestMatcherRegistry ->
                 authorizationManagerRequestMatcherRegistry
+                    .requestMatchers(
+                        "/api/auth/v3/api-docs/**",
+                        "/api/auth/swagger-ui/**",
+                        "/api/auth/swagger-ui.html"
+                    ).permitAll()
+                    .requestMatchers("/api/auth/user/details/**").permitAll()
+                    .requestMatchers("/api/auth/user/update").hasAnyAuthority(Role.SUBSCRIBER, Role.POSTMAN, Role.GUEST)
+                    .requestMatchers("/api/auth/user/**").hasAuthority(Role.ADMIN)
+                    .requestMatchers("/api/auth/role/**").hasAuthority(Role.ADMIN)
                     .requestMatchers("api/auth/registration-postman").hasAuthority(Role.ADMIN)
                     .requestMatchers("api/auth/become-subscriber").hasAuthority(Role.GUEST)
-                    .requestMatchers("/api/auth/user").hasAuthority(Role.ADMIN)
                     .requestMatchers(
                         "/api/auth/**",
                     )
                     .permitAll()
-                    .requestMatchers("/api/role/**").hasAuthority(Role.ADMIN)
-                    .requestMatchers("/api/postman/**").hasAuthority(Role.ADMIN)
-                    .requestMatchers("/api/report/**").hasAuthority(Role.ADMIN)
-                    .requestMatchers("/api/subscriber/create").hasAuthority(Role.GUEST)
-                    .requestMatchers("/api/subscriber/update").hasAuthority(Role.SUBSCRIBER)
-                    .requestMatchers("/api/subscriber/delete").hasAuthority(Role.SUBSCRIBER)
-                    .requestMatchers("/api/publication-type/**").hasAuthority(Role.ADMIN)
-                    .requestMatchers("/api/publication/**").hasAuthority(Role.ADMIN)
-                    .requestMatchers("/api/subscription/create").hasAuthority(Role.SUBSCRIBER)
-                    .requestMatchers("/api/subscription/update").hasAuthority(Role.SUBSCRIBER)
                     .anyRequest()
                     .authenticated()
             }

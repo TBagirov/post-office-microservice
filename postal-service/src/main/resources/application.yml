@@ -3,29 +3,51 @@ spring:
     name: postal-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/po-postal
-    username: postgres
-    password: PosTer231
+    url: jdbc:postgresql://postal-db:5432/${POSTAL_DB_NAME}
+    username: ${POSTAL_DB_USER}
+    password: ${POSTAL_DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     show-sql: true
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
       group-id: postal-service-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      missing-topics-fatal: false
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: ${EUREKA_SERVER}
   instance:
-    hostname: localhost    # Принудительно указываем localhost
     prefer-ip-address: true  # Использовать IP-адрес вместо имени хоста
 
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /api/postal/swagger-ui.html
+  api-docs:
+    enabled: true
+    path: /api/postal/v3/api-docs
+
+
+internal:
+  api-secret: ${INTERNAL_API_SECRET}
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+    access-expiration: ${ACCESS_EXPIRATION}
+    refresh-expiration: ${REFRESH_EXPIRATION}
+
 server:
-  port: 8082
+  port: 0

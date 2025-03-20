@@ -1,6 +1,7 @@
 package org.bagirov.authservice.controller
 
 import mu.KotlinLogging
+import org.bagirov.authservice.dto.request.RoleRequest
 import org.bagirov.authservice.dto.response.RoleResponse
 import org.bagirov.authservice.service.RoleService
 import org.springframework.http.ResponseEntity
@@ -8,7 +9,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@RequestMapping("/api/role")
+@RequestMapping("/api/auth/role")
 class RoleController(
     private val roleService: RoleService
 ) {
@@ -28,7 +29,7 @@ class RoleController(
 
 
     @PostMapping()
-    fun save(@RequestBody role: String): ResponseEntity<RoleResponse> {
+    fun save(@RequestBody role: RoleRequest): ResponseEntity<RoleResponse> {
         log.info { "Request save Role" }
         return ResponseEntity.ok(roleService.save(role))
     }

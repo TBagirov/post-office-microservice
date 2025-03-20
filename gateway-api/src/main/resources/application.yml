@@ -19,13 +19,51 @@ gateway:
     - id: publication-service
       path: /api/publication/**
       uri: lb://publication-service
+    - id: subscription-service
+      path: /api/subscription/**
+      uri: lb://subscription-service
+    - id: report-service
+      path: /api/report/**
+      uri: lb://report-service
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs   # Указывает основной путь для API-документации
+  swagger-ui:
+    enabled: true
+    disable-swagger-default-url: true  # Убирает пустую вкладку
+    urls:
+      - name: Auth Service
+        url: /api/auth/v3/api-docs
+      - name: Postal Service
+        url: /api/postal/v3/api-docs
+      - name: Subscriber Service
+        url: /api/subscriber/v3/api-docs
+      - name: Publication Service
+        url: /api/publication/v3/api-docs
+      - name: Subscription Service
+        url: /api/subscription/v3/api-docs
+      - name: Report Service
+        url: /api/report/v3/api-docs
+
+
+cloud:
+  gateway:
+    globalcors:
+      cors-configurations:
+        '[/**]':
+          allowedOrigins: "*"
+          allowedMethods: "*"
+          allowedHeaders: "*"
+          allowCredentials: true
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: ${EUREKA_SERVER}
 
   instance:
-    hostname: localhost    # Принудительно указываем localhost
     prefer-ip-address: true  # Использовать IP-адрес вместо имени хоста
+
 

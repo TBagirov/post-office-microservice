@@ -1,13 +1,16 @@
 package org.bagirov.postalservice.controller
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
-//import org.bagirov.postalservice.dto.postalservice.RegistrationRequest
+import org.bagirov.postalservice.config.CustomUserDetails
 import org.bagirov.postalservice.dto.response.PostmanResponse
+import org.bagirov.postalservice.dto.response.RegionResponse
 import org.bagirov.postalservice.entity.PostmanEntity
 import org.bagirov.postalservice.service.PostmanService
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -29,6 +32,19 @@ class PostmanController (
         log.info { "Request Postman by id: $id" }
         return ResponseEntity.ok(postmanService.getById(id))
     }
+
+    @GetMapping("/my/regions")
+    @Operation(
+        summary = "Получение регионов обслуживаемых почтальоном",
+        description = "Получение данных о регионах обслуживаемых почтальоном"
+    )
+    fun getRegionsOfPostman(@Parameter(hidden = true) @AuthenticationPrincipal user: CustomUserDetails)
+    : ResponseEntity<List<RegionResponse>>
+    {
+        log.info { "Request to get regions served by the postman" }
+        return ResponseEntity.ok(postmanService.getMyRegions(user))
+    }
+
 
     @GetMapping()
     @Operation(

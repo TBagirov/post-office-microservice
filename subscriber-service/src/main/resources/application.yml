@@ -3,16 +3,19 @@ spring:
     name: subscriber-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/po-subscriber
-    username: postgres
-    password: PosTer231
+    url: jdbc:postgresql://subscriber-db:5432/${SUBSCRIBER_DB_NAME}
+    username: ${SUBSCRIBER_DB_USER}
+    password: ${SUBSCRIBER_DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     show-sql: true
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
       group-id: subscriber-service-group
       auto-offset-reset: earliest
@@ -22,19 +25,31 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: ${EUREKA_SERVER}
   instance:
-    hostname: localhost    # Принудительно указываем localhost
     prefer-ip-address: true  # Использовать IP-адрес вместо имени хоста
 
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /api/subscriber/swagger-ui.html
+  api-docs:
+    enabled: true
+    path: /api/subscriber/v3/api-docs
+
+
 server:
-  port: 8083
+  port: 0
+
+internal:
+  api-secret: ${INTERNAL_API_SECRET}
+
 
 security:
   jwt:
-    secret: ab8b9c27d8daa77f1a3d96ff43236fca17e75ecd53138da795d1629148f4c5b620daa674f1f005b1907f469e1cce3f8203f2cd38f167015791171f2a55f37ac62f2d4b1aba6b91799d5bf9de2d4471672909077f4384b36f8e3385e69ac59137816351713df1e99cd7bdc0b40f59c801cde20d6ee7cfb35f5e99a11e374afa876c8e6a5e40115f92799d381dba033c30b26c4d03524aa5502015f67d6b9ca8cad8f6c054819123bab1877152bf04ba85046f8783b205e92a82a75aba45be0cd2542b8ee8b88c9db60f36582b4ab80f759d64d15bbfdc63d436db2495e394dd2e28a707249d234e8200be26718de1f4f0fecd2e5581b4891207d5d0ead6799f94
-    access-expiration: 36000000 # 10 hours
-    refresh-expiration: 252000000 # 7 days
+    secret: ${JWT_SECRET}
+    access-expiration: ${ACCESS_EXPIRATION}
+    refresh-expiration: ${REFRESH_EXPIRATION}
 
 resilience4j.circuitbreaker:
   instances:

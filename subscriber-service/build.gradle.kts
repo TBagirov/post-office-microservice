@@ -32,12 +32,14 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.kafka:spring-kafka")
-    implementation("io.github.microutils:kotlin-logging:3.0.5")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
 
+    // LOG
+    implementation("io.github.microutils:kotlin-logging:3.0.5")
+
     // SWAGGER
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.3")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
 
     // JJWT
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
@@ -45,6 +47,7 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 
     runtimeOnly("org.postgresql:postgresql")
+    testImplementation("io.mockk:mockk:1.13.9")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.springframework.kafka:spring-kafka-test")

@@ -4,8 +4,9 @@ package org.bagirov.postalservice.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
+import org.bagirov.postalservice.dto.request.RegionRequest
+import org.bagirov.postalservice.dto.request.RegionUpdateRequest
 import org.bagirov.postalservice.dto.response.RegionResponse
-import org.bagirov.postalservice.entity.RegionEntity
 import org.bagirov.postalservice.service.RegionService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -45,7 +46,7 @@ class RegionController(
         summary = "Добавление региона",
         description = "Добавление данных региона"
     )
-    fun save(@RequestBody region: RegionEntity): ResponseEntity<RegionResponse> {
+    fun save(@RequestBody region: RegionRequest): ResponseEntity<RegionResponse> {
         log.info { "Request create Region" }
         return ResponseEntity.ok(regionService.save(region))
     }
@@ -55,14 +56,14 @@ class RegionController(
         summary = "Редактирование региона по id",
         description = "Редактирование данных региона по id"
     )
-    fun update(@RequestBody region: RegionEntity): ResponseEntity<RegionResponse> {
+    fun update(@RequestBody region: RegionUpdateRequest): ResponseEntity<RegionResponse> {
         log.info {"Request update Region by id ${region.id}"}
         return ResponseEntity.ok(regionService.update(region))
     }
 
     @DeleteMapping()
     @Operation(
-        summary = "Получение всех отношений",
+        summary = "Удаление региона",
         description = "Удаление региона по id, " +
                 "удаленный регион в записях других таблиц изменится на null"
     )
