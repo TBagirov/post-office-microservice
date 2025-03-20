@@ -6,6 +6,7 @@ import mu.KotlinLogging
 import org.bagirov.subscriberservice.dto.UserBecomeSubscriberEventDto
 import org.bagirov.subscriberservice.entity.SubscriberEntity
 import org.bagirov.subscriberservice.repository.SubscriberRepository
+import org.bagirov.subscriberservice.utill.convertToEventDto
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -15,7 +16,8 @@ import java.util.*
 @Service
 class KafkaConsumerService (
     private val subscriberRepository: SubscriberRepository,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val kafkaProducerService: KafkaProducerService
 ){
 
     private val log = KotlinLogging.logger {}
@@ -34,7 +36,10 @@ class KafkaConsumerService (
         )
 
         subscriberRepository.save(subscriber)
-        log.info("Создан подписчик: ${event.userId}")
+        log.info("Subscriber created: ${event.userId}")
+
+        kafkaProducerService.sendPublicationCreatedEvent(subscriber.convertToEventDto())
+        log.info("Sent subscriber created event to Kafka: $message")
     }
 
 
@@ -46,11 +51,11 @@ class KafkaConsumerService (
 
             subscriberRepository.findByUserId(userId)?.let { subscriber ->
                 subscriberRepository.delete(subscriber)
-                log.info("Удален почтальон, связанный с пользователем $userId")
-            } ?: log.warn("Почтальон с userId $userId не найден")
+                log.info("Subscriber deleted for user $userId")
+            } ?: log.warn("Subscriber with userId $userId not found")
 
         } catch (e: Exception) {
-            log.error("Ошибка обработки Kafka-сообщения о удалении пользователя: ${e.message}", e)
+            log.error(e) { "Error processing Kafka message about user deletion: ${e.message}" }
         }
     }
 

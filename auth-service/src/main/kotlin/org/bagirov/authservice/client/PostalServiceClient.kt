@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam
 
 @FeignClient(
     name = "postal-service",
-    fallback = PostalServiceClientFallback::class
+    fallback = PostalServiceClientFallbackFactory::class
 )
 interface PostalServiceClient {
     @GetMapping("/api/postal/street/street-info")

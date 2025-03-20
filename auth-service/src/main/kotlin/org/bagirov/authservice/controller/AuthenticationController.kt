@@ -1,6 +1,7 @@
 package org.bagirov.authservice.controller
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
 import org.bagirov.authservice.dto.request.AuthenticationRequest
@@ -35,16 +36,17 @@ class AuthenticationController(
     fun registration(@RequestBody request: RegistrationRequest, response: HttpServletResponse):
             ResponseEntity<AuthenticationResponse>
     {
-        logger.info("Request to registration ${request.username}")
+        logger.info {"Request to registration ${request.username}"}
         return ResponseEntity.ok(authService.registration(request, response))
     }
+
 
     @PostMapping("/registration-postman")
     @Operation(summary = "Регистрация пользователя")
     fun registrationPostman(@RequestBody request: RegistrationRequest, response: HttpServletResponse):
             ResponseEntity<AuthenticationResponse>
     {
-        logger.info("Request to registration postman ${request.username}")
+        logger.info {"Request to registration postman ${request.username}"}
         return ResponseEntity.ok(authService.registration(request, response, Role.POSTMAN))
     }
 
@@ -54,7 +56,7 @@ class AuthenticationController(
         description = "Преобразует пользователя GUEST в SUBSCRIBER, добавляя данные о подписке"
     )
     fun becomeSubscriber(
-        @AuthenticationPrincipal user: UserEntity,
+        @Parameter(hidden = true) @AuthenticationPrincipal user: UserEntity,
         @RequestBody request: BecomeSubscriberRequest
     ): ResponseEntity<String> {
         authService.becomeSubscriber(user, request)
@@ -66,18 +68,20 @@ class AuthenticationController(
     fun logout(@CookieValue(value = "refreshToken") token: String, response: HttpServletResponse):
             ResponseEntity<Map<String, String>>
     {
-        logger.info("Request to logout")
+        logger.info {"Request to logout"}
         return ResponseEntity.ok(authService.logout(token, response))
     }
 
     @GetMapping("/refresh")
     @Operation(summary = "Обновление токена")
-    fun refresh(@CookieValue(value = "refreshToken") token: String, response: HttpServletResponse):
+    fun refresh(@Parameter(hidden = true) @CookieValue(value = "refreshToken") token: String, response: HttpServletResponse):
             ResponseEntity<AuthenticationResponse>
     {
         logger.info {"Request to refresh"}
         return ResponseEntity.ok(authService.refresh(token, response))
     }
+
+
 
 
 

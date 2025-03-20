@@ -34,7 +34,7 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 
     // SWAGGER
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.3")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
 
     // Kafka
     implementation("org.springframework.kafka:spring-kafka")
@@ -48,6 +48,8 @@ dependencies {
 
 
     runtimeOnly("org.postgresql:postgresql")
+
+    testImplementation("io.mockk:mockk:1.13.9")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.springframework.security:spring-security-test")

@@ -3,10 +3,9 @@ package org.bagirov.authservice.service
 import io.jsonwebtoken.*
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
+import mu.KotlinLogging
 import org.bagirov.authservice.entity.UserEntity
 import org.bagirov.authservice.props.JwtProperties
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Service
@@ -19,13 +18,14 @@ import javax.crypto.SecretKey
 @Service
 class JwtService(
     private val jwtProperties: JwtProperties,
-    private val userDetailsService: UserDetailsService,
+    private val userDetailsService: UserDetailsService
 ) {
-    var key: SecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.secret))
+    private var key: SecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.secret))
 
-    fun createAccessToken(
-        user: UserEntity
-    ): String {
+    private val log = KotlinLogging.logger {}
+
+    fun createAccessToken(user: UserEntity): String {
+        log.info { "Generating access token for user: ${user.username}" }
         val validity = Instant.now()
             .plus(jwtProperties.accessExpiration, ChronoUnit.HOURS)
         return Jwts.builder()
@@ -38,6 +38,7 @@ class JwtService(
     }
 
     fun createRefreshToken(user: UserEntity): String {
+        log.info { "Generating refresh token for user: ${user.username}" }
         val validity = Instant.now()
             .plus(jwtProperties.refreshExpiration, ChronoUnit.DAYS)
         return Jwts.builder()
@@ -48,84 +49,43 @@ class JwtService(
             .compact()
     }
 
-//    fun refreshUserTokens(
-//        refreshToken: String?
-//    ): AuthenticationResponse {
-//
-//        if (!isValid(refreshToken)) {
-//            throw AccessDeniedException("не валидный токен")
-//        }
-//        val userId = getId(refreshToken)
-//        val user: UserEntity? = userService.getById(UUID.fromString(userId))
-//
-//        val authenticationResponse: AuthenticationResponse = AuthenticationResponse(
-//            id = UUID.fromString(userId),
-//            username = user!!.username,
-//            accessToken = createAccessToken(user),
-//            refreshToken = createRefreshToken(user),
-//        )
-//
-//        return authenticationResponse
-//    }
-
-
-//    fun isValid(
-//        token: String?,
-//        userDetails: UserDetails
-//    ): Boolean {
-//        val username = getUsername(token!!)
-//        val claims = Jwts
-//            .parser()
-//            .verifyWith(key)
-//            .build()
-//            .parseSignedClaims(token)
-//        return claims.payload
-//            .expiration
-//            .after(Date()) && username == userDetails.username
-//    }
-
     fun extractClaims(token: String): Claims {
         return try {
+            log.info { "Extracting claims from token" }
             Jwts.parser().verifyWith(key).build().parseSignedClaims(token).payload
         } catch (ex: ExpiredJwtException) {
-            throw ex // Пробрасываем дальше, чтобы обработать в GlobalExceptionHandler
+            log.warn { "Token has expired" }
+            throw ex
         } catch (ex: MalformedJwtException) {
+            log.error { "Malformed JWT token" }
             throw JwtException("Malformed JWT token", ex)
         } catch (ex: JwtException) {
+            log.error { "Invalid JWT token" }
             throw JwtException("Invalid JWT token", ex)
         }
     }
 
-    fun getId(token: String): String =
-        extractClaims(token).get("id", String::class.java)
+    fun getId(token: String): String {
+        log.info { "Extracting user ID from token" }
+        return extractClaims(token).get("id", String::class.java)
+    }
 
-    fun getUsername(token: String): String =
-        extractClaims(token).subject
+    fun getUsername(token: String): String {
+        log.info { "Extracting username from token" }
+        return extractClaims(token).subject
+    }
 
     fun isValid(token: String?, userDetails: UserDetails): Boolean {
         if (token == null) return false
         val claims = extractClaims(token)
+        log.info { "Validating token for user: ${userDetails.username}" }
         return claims.expiration.after(Date()) && claims.subject == userDetails.username
     }
 
     fun isValidExpired(token: String): Boolean {
+        log.info { "Checking if token is expired" }
         val claims = extractClaims(token)
         return claims.expiration.after(Date())
     }
-
-    fun getAuthentication(
-        token: String
-    ): Authentication {
-        val username = getUsername(token)
-        val userDetails = userDetailsService.loadUserByUsername(
-            username
-        )
-        return UsernamePasswordAuthenticationToken(
-            userDetails,
-            "",
-            userDetails.authorities
-        )
-    }
-
 
 }

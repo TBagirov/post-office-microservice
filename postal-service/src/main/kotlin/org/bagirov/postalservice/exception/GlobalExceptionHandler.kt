@@ -19,27 +19,26 @@ class GlobalExceptionHandler {
         val status: Int
     )
 
-
-    // Перехватываем JwtException
+    // Перехватываем AccessDeniedException
     @ExceptionHandler(AccessDeniedException::class)
-    fun handleJwtException(ex: AccessDeniedException): ResponseEntity<ErrorResponse> {
-        log.error {"JwtException:  ${ex.printStackTrace()}" }
+    fun handleAccessDeniedException(ex: AccessDeniedException): ResponseEntity<ErrorResponse> {
+        log.error(ex) { "Access denied exception: ${ex.message}" }
 
         val errorResponse = ErrorResponse(
             error = "Access denied",
             message = ex.message,
             status = HttpStatus.FORBIDDEN.value()
         )
-        return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity(errorResponse, HttpStatus.FORBIDDEN)
     }
 
     // Перехватываем IllegalArgumentException
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<ErrorResponse> {
-        log.error {"IllegalArgumentException:  ${ex.printStackTrace()}" }
+        log.error(ex) { "Illegal argument exception: ${ex.message}" }
 
         val errorResponse = ErrorResponse(
-            error = "Error from an invalid argument",
+            error = "Invalid argument error",
             message = ex.message,
             status = HttpStatus.BAD_REQUEST.value()
         )
@@ -49,20 +48,20 @@ class GlobalExceptionHandler {
     // Перехватываем все исключения типа NoSuchElementException
     @ExceptionHandler(NoSuchElementException::class)
     fun handleNoSuchElementException(ex: NoSuchElementException): ResponseEntity<ErrorResponse> {
-        log.error {"NoSuchElementException:  ${ex.printStackTrace()}" }
+        log.error(ex) { "No such element exception: ${ex.message}" }
 
         val errorResponse = ErrorResponse(
-            error = "No such element",
+            error = "No such element found",
             message = ex.message,
-            status = HttpStatus.BAD_REQUEST.value()
+            status = HttpStatus.NOT_FOUND.value()
         )
-        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
+        return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
     }
 
     // Перехватываем все исключения типа RuntimeException
     @ExceptionHandler(RuntimeException::class)
     fun handleRuntimeException(ex: RuntimeException): ResponseEntity<ErrorResponse> {
-        log.error {"RuntimeException:  ${ex.printStackTrace()}" }
+        log.error(ex) { "Runtime exception: ${ex.message}" }
 
         val errorResponse = ErrorResponse(
             error = "Internal Server Error",
@@ -75,14 +74,13 @@ class GlobalExceptionHandler {
     // Перехватываем любые Exception (общий случай)
     @ExceptionHandler(Exception::class)
     fun handleGenericException(ex: Exception): ResponseEntity<ErrorResponse> {
-        log.error {"Exception:  ${ex.printStackTrace()}" }
+        log.error(ex) { "Unexpected exception: ${ex.message}" }
 
         val errorResponse = ErrorResponse(
-            error = "Unexpected Error",
+            error = "Unexpected error",
             message = ex.message,
             status = HttpStatus.BAD_REQUEST.value()
         )
         return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
     }
-
 }

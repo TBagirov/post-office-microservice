@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: notification-service
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USER}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  kafka:
+    bootstrap-servers: kafka:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: notification-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      missing-topics-fatal: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER}
+  instance:
+    prefer-ip-address: true  # Использовать IP-адрес вместо имени хоста
+
+server:
+  port: 0
+
+internal:
+  api-secret: ${INTERNAL_API_SECRET}
+
+resilience4j.circuitbreaker:
+  instances:
+    postalService:
+      failureRateThreshold: 50  # Открыть Circuit Breaker при 50% неудачных запросов
+      slowCallRateThreshold: 50
+      slowCallDurationThreshold: 2s
+      minimumNumberOfCalls: 5  # Минимум 5 вызовов перед изменением состояния
+      slidingWindowSize: 10  # Окно для расчета отказов
+      permittedNumberOfCallsInHalfOpenState: 2  # Количество попыток при Half-Open
+      waitDurationInOpenState: 10s  # Как долго ждать перед попыткой восстановления
+
+
+
+

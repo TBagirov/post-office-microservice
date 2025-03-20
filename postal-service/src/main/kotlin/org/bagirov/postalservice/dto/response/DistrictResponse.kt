@@ -1,10 +1,17 @@
 package org.bagirov.postalservice.dto.response
 
+
+import io.swagger.v3.oas.annotations.media.Schema
 import java.util.*
 
-data class DistrictResponse (
+@Schema(description = "DTO, описывающее связь почтальона и района")
+data class DistrictResponse(
+    @Schema(description = "ID записи (district)")
     val id: UUID,
-//    val postmanName: String?,
+
+    @Schema(description = "ID почтальона (postmanId)")
     val postmanId: UUID?,
+
+    @Schema(description = "Название региона")
     val regionName: String?
 )

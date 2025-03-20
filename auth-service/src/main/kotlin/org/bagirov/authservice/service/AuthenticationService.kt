@@ -49,13 +49,13 @@ class AuthenticationService(
         log.info { "Starting authorization process for user: ${request.username}" }
         if (!isValidAuthenticationCredentials(request)) {
             log.warn { "Invalid authentication credentials provided" }
-            throw IllegalArgumentException("Поля логин и/или пароль пустые")
+            throw IllegalArgumentException("Username and/or password fields are empty")
         }
 
         val user = userRepository.findByUsername(request.username)
             .orElseThrow {
                 log.error { "User ${request.username} not found" }
-                NoSuchElementException("пользователь не зарегистрирован")
+                NoSuchElementException("User is not registered")
             }
 
         authenticationManager.authenticate(UsernamePasswordAuthenticationToken(request.username, request.password))
@@ -74,15 +74,9 @@ class AuthenticationService(
     @Transactional
     fun registration(request: RegistrationRequest, response: HttpServletResponse, roleName: String = "GUEST"): AuthenticationResponse {
         log.info { "Starting registration process for user: ${request.username}" }
-        if (!isValidRegistrationCredentials(request)) {
-            log.warn { "Invalid registration credentials provided" }
-            throw IllegalArgumentException("Заполнены не все данные!!!")
-        }
 
-        if (userRepository.findAll().any { it.username == request.username }) {
-            log.warn { "User with username ${request.username} already exists" }
-            throw IllegalArgumentException("Пользователь с таким username уже существует")
-        }
+        // все проверки, если не выбросилось ни одно исключение, значит можно регистрировать
+        validRequestRegistration(request)
 
         val role = roleRepository.findByName(roleName)!!
         val user = UserEntity(
@@ -97,26 +91,36 @@ class AuthenticationService(
             createdAt = LocalDateTime.now()
         )
 
-        userRepository.save(user)
+        // было
+        //userRepository.save(user)
+        val saveUser = userRepository.save(user)
         log.info { "User ${request.username} registered successfully" }
 
-        val accessToken = jwtService.createAccessToken(user)
-        val refreshToken = jwtService.createRefreshToken(user)
+        val accessToken = jwtService.createAccessToken(saveUser)
+        val refreshToken = jwtService.createRefreshToken(saveUser)
 
         setRefreshTokenInCookie(response, refreshToken)
-        refreshTokenRepository.save(RefreshTokenEntity(user = user, token = refreshToken))
+        refreshTokenRepository.save(RefreshTokenEntity(user = saveUser, token = refreshToken))
         log.info { "Generated refresh token for newly registered user: ${request.username}" }
 
-        kafkaProducerService.sendUserCreatedEvent(user.convertToResponseEventDto())
+        kafkaProducerService.sendUserCreatedEvent(saveUser.convertToResponseEventDto())
 
         log.info { "Sent Kafka event for user registration: ${request.username}" }
 
-        return AuthenticationResponse(accessToken = accessToken, username = user.username, id = user.id!!)
+        return AuthenticationResponse(accessToken = accessToken, username = saveUser.username, id = saveUser.id!!)
     }
 
     @Transactional
-    @CircuitBreaker(name = "postalService", fallbackMethod = "fallbackUpdateSubscriber")
+    @CircuitBreaker(name = "subscriberService", fallbackMethod = "fallbackUpdateSubscriber")
     fun becomeSubscriber(currentUser: UserEntity, request: BecomeSubscriberRequest) {
+
+        // Проверяем длину полей building и subAddress
+        if (request.building.length > 5) {
+            throw IllegalArgumentException("Значение 'building' не может быть длиннее 5 символов")
+        }
+        if ((request.subAddress?.length ?: 0) > 5) {
+            throw IllegalArgumentException("Значение 'subAddress' не может быть длиннее 5 символов")
+        }
 
         // Ищем пользователя
         val user = userRepository.findById(currentUser.id!!)
@@ -124,7 +128,7 @@ class AuthenticationService(
 
 
         val roleSubscriber = roleRepository.findByName(Role.SUBSCRIBER)
-            ?: throw java.util.NoSuchElementException("Роли ${Role.SUBSCRIBER} нет в базе данных!")
+            ?: throw NoSuchElementException("Роли ${Role.SUBSCRIBER} нет в базе данных!")
 
         // Запрашиваем у PostalService `streetId` и `districtId`
         val postalData = postalServiceClient.getStreetAndDistrict(request.streetName)
@@ -148,7 +152,7 @@ class AuthenticationService(
     // fallback метод, если PostalService недоступен
     fun fallbackUpdateSubscriber(user: UserEntity, request: BecomeSubscriberRequest, ex: Throwable) {
         log.error("Circuit Breaker activated for postal-service! Reason: ${ex.message}", ex)
-        throw IllegalStateException("Circuit Breaker: Postal Service is currently unavailable: ${ex.message}. Please try again later.")
+        throw IllegalStateException("Circuit Breaker: Subscriber Service is currently unavailable: ${ex.message}. Please try again later.")
     }
 
     fun logout(token: String, response: HttpServletResponse): Map<String, String> {
@@ -191,6 +195,51 @@ class AuthenticationService(
         setRefreshTokenInCookie(response, refreshToken)
         return AuthenticationResponse(accessToken = accessToken, username = user.username, id = user.id!!)
     }
+
+    private fun validRequestRegistration(request: RegistrationRequest){
+
+        if (!isValidRegistrationCredentials(request)) {
+            log.warn { "Invalid registration credentials provided" }
+            throw IllegalArgumentException("Заполнены не все данные!!!")
+        }
+
+        if (!isValidEmail(request.email)) {
+            log.warn { "Invalid email format: ${request.email}" }
+            throw IllegalArgumentException("Некорректный формат email")
+        }
+
+        if (!isValidPhone(request.phone)) {
+            log.warn { "Invalid phone format: ${request.phone}" }
+            throw IllegalArgumentException("Некорректный формат номера телефона (Ожидаемый формат: +7XXXXXXXXXX)")
+        }
+
+        if (userRepository.existsByUsername(request.username)) {
+            log.warn { "User with username ${request.username} already exists" }
+            throw IllegalArgumentException("Пользователь с таким username уже существует")
+        }
+
+        if (userRepository.existsByEmail(request.email)) {
+            log.warn { "User with email ${request.email} already exists" }
+            throw IllegalArgumentException("Пользователь с таким email уже существует")
+        }
+
+        if (userRepository.existsByPhone(request.phone)) {
+            log.warn { "User with phone ${request.phone} already exists" }
+            throw IllegalArgumentException("Пользователь с таким phone уже существует")
+        }
+
+    }
+
+    private fun isValidEmail(email: String): Boolean {
+        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+        return email.matches(emailRegex)
+    }
+
+    private fun isValidPhone(phone: String): Boolean {
+        val phoneRegex = "^\\+7\\d{10}$".toRegex()
+        return phone.matches(phoneRegex)
+    }
+
 
     fun setRefreshTokenInCookie(response: HttpServletResponse, token: String) {
         val cookie = ResponseCookie.from("refreshToken", token)
