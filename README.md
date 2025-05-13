@@ -58,7 +58,7 @@
 - Использует **Kafka** для обработки событий (`notification-events`).
 - Шаблонные письма через **Thymeleaf**.
 
-### 8. Report Service (`report-service`) *(отключен)*
+### 8. Report Service (`report-service`)
 - Генерация отчетов в **Excel** на основе подписок.
 - Использует **Apache POI** и данные из других сервисов.
 
