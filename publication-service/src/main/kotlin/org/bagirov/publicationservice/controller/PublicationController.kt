@@ -3,6 +3,8 @@ package org.bagirov.publicationservice.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
 import org.bagirov.publicationservice.dto.request.PublicationRequest
@@ -12,6 +14,7 @@ import org.bagirov.publicationservice.dto.response.client.PublicationResponseCli
 import org.bagirov.publicationservice.service.PublicationService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
@@ -71,15 +74,36 @@ class PublicationController(
         )
     }
 
-    @PostMapping("/upload-cover/{id}")
-    @Operation(summary = "Загрузка обложки", description = "Загружает изображение обложки в MinIO")
+    @PostMapping(
+        "/upload-cover/{id}",
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE]        // <-- важно
+    )
+    @Operation(
+        summary = "Загрузка обложки",
+        description = "Загружает изображение обложки в MinIO"
+    )
     fun uploadCover(
         @PathVariable id: UUID,
-        @RequestParam("file") file: MultipartFile
+
+        // Swagger поймёт, что это файл, если:
+        //  1) параметр MultipartFile помечен как @RequestPart
+        //  2) schema указывает type=binary (ниже через @Parameter)
+        @RequestPart("file")
+        @Parameter(
+            description = "Файл изображения обложки",
+            content = [
+                Content(
+                    mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                    schema = Schema(type = "string", format = "binary")
+                )
+            ]
+        )
+        file: MultipartFile
     ): ResponseEntity<String> {
         val coverUrl = publicationService.uploadCover(id, file)
         return ResponseEntity.ok(coverUrl)
     }
+
 
     @PostMapping()
     @Operation(
